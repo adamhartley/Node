@@ -27,16 +27,18 @@ const server = http.createServer((req, res) => {
             body.push(chunk);
         });
         // register end listener, which is executed when the incoming request data has finished being parsed
-        req.on('end', () => {
+        return req.on('end', () => {
             const parsedBody = Buffer.concat(body).toString();
-            console.log(parsedBody);
             const message = parsedBody.split('=')[1];
-            fs.writeFileSync('message.txt', message);
-        })
+            console.log(parsedBody);
 
-        res.statusCode = 302;// 302 - redirect status code
-        res.setHeader('Location', '/');
-        return res.end();
+            // Asynchronously write file with data from request body
+            fs.writeFile('message.txt', message, (err) => {
+                res.statusCode = 302; // 302 - redirect status code
+                res.setHeader('Location', '/');
+                return res.end();
+            });
+        });
     }
     // set response header
     res.setHeader('Content-Type', 'text/html');
