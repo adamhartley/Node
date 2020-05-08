@@ -1,7 +1,11 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 
 // create an express app
 const app = express();
+
+// add request parser (body-parser package)
+app.use(bodyParser.urlencoded({extended: false}));
 
 /*
  * use() mounts the specified middleware function or functions at the specified path: the middleware
@@ -18,8 +22,13 @@ app.use('/', (req, res, next) => {
 
 app.use('/add-product', (req, res, next) => {
     console.log('In add-product middleware!!!');
-    res.send('<h1>Add product page!!</h1>');
+    res.send('<form action="/product" method="POST"><input type="text" name="title"><button type="submit">Add Producct</button></form>');
 });
+
+app.use('/product', (req, res, next) => {
+    console.log(req.body);
+    res.redirect('/');
+})
 
 app.use('/', (req, res, next) => {
     console.log('In home page middleware!!!');
