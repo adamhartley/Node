@@ -7,8 +7,7 @@ const adminData = require('./admin');
 const router = express.Router();
 
 router.get('/', (req, res, next) => {
-    console.log('shop.js', adminData.products);
-    res.sendFile(path.join(rootDir, 'views', 'shop.html')); // __dirname is a constant which holds the absolute path to this project folder
+    res.render('shop'); // use pug template to render html
 });
 
 module.exports = router;

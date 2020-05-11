@@ -8,6 +8,9 @@ const rootDir = require('./util/path')
 
 // create an express app
 const app = express();
+// set html templating framework
+app.set('view engine', 'pug'); //use pug engine to compile dynamic templates
+app.set('views', 'views'); // where to find the html files (views is the default, but setting it anyway)
 
 // add request parser (body-parser package)
 app.use(bodyParser.urlencoded({extended: false}));
