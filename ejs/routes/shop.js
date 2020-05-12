@@ -7,7 +7,8 @@ const adminData = require('./admin');
 const router = express.Router();
 
 router.get('/', (req, res, next) => {
-    res.render('shop'); // use pug template to render html
+    const products = adminData.products;
+    res.render('shop', {prods: products, docTitle: 'Shop'}); // use pug template to render html
 });
 
 module.exports = router;
