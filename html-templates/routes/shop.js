@@ -8,7 +8,14 @@ const router = express.Router();
 
 router.get('/', (req, res, next) => {
     const products = adminData.products;
-    res.render('shop', {prods: products, pageTitle: 'Shop', path: '/'}); // use pug template to render html
+    res.render('shop', {
+        prods: products,
+        pageTitle: 'Shop',
+        path: '/',
+        hasProducts: products.length > 0,
+        activeShop: true, // needed for handlebar template
+        productCSS: true  // needed for handlebar template
+    });
 });
 
 module.exports = router;

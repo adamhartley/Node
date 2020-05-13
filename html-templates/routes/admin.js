@@ -9,7 +9,13 @@ const products = [];
 
 // /admin/add-product => GET
 router.get('/add-product', (req, res, next) => {
-    res.render('add-product', {pageTitle: 'Add Product', path: '/admin/add-product'});
+    res.render('add-product', {
+        pageTitle: 'Add Product',
+        path: '/admin/add-product',
+        activeAddProduct: true, // needed for handlebar template
+        productCSS: true, // needed for handlebar template
+        formsCSS: true // needed for handlebar template
+    });
 });
 
 // /admin/add-product => POST
