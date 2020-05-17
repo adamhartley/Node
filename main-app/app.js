@@ -1,15 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-// const expressHbs = require('express-handlebars')
 
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const errorController = require('./controllers/error')
 const rootDir = require('./util/path')
 
 // create an express app
 const app = express();
-// set html templating framework
 /*
  * Use the EJS templating engine
  */
@@ -25,8 +24,6 @@ app.use('/admin', adminRoutes); // register admin routes
 app.use(shopRoutes); // register shop routes
 
 // catch all route: if we made it through all the routes, return a 404 page not found
-app.use((req, res, next) => {
-    res.status(404).render('404', {pageTitle: 'Page Not Found'});
-})
+app.use(errorController.get404)
 
 app.listen(3000);
