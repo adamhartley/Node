@@ -30,22 +30,6 @@
     text-align: center;
 }
 
-.form-control {
-    margin: 1rem 0;
-    width: 100%;
-}
-
-.form-control label,
-.form-control input {
-    display: block;
-}
-
-.form-control input {
-    border: 1px solid #00ED00;
-    font: inherit;
-    border-radius: 2px;
-}
-
 button {
     font: inherit;
     color: black;
