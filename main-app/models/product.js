@@ -30,6 +30,7 @@ module.exports = class Product {
     }
 
     save() {
+        this.id = Math.random().toString(); // dummy id value, random enough for this example
         getProductsFromFile(products => {
             // append product to array of products
             products.push(this);
@@ -41,5 +42,12 @@ module.exports = class Product {
 
     static fetchAll(callback) {
         getProductsFromFile(callback);
+    }
+
+    static findById(id, cb) {
+        getProductsFromFile(products => {
+            const product = products.find(prod => prod.id === id);
+            cb(product);
+        })
     }
 };
