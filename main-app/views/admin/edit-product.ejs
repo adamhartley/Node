@@ -16,7 +16,7 @@
         </div>
         <div class="form-control">
             <label for="imageUrl">Image URL</label>
-            <input type="text" name="imageUrl" id="imageUrl" value="<% if (editing) { %><%= product.imageUrl %><% } %>>
+            <input type="text" name="imageUrl" id="imageUrl" value="<% if (editing) { %><%= product.imageUrl %><% } %>">
         </div>
         <div class=" form-control">
             <label for="price">Price</label>
@@ -30,6 +30,10 @@
                 <% } %>
             </textarea>
         </div>
+        <!-- hidden input for transmitting the product id in the POST to edit-product  -->
+        <% if (editing) { %>
+            <input type="hidden" value="<%= product.id %>" name="productId">
+        <% } %>
 
         <button type="submit">
             <% if (editing) { %> Update Product

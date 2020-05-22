@@ -22,7 +22,8 @@ const getProductsFromFile = callback => {
 }
 
 module.exports = class Product {
-    constructor(title, imageUrl, description, price) {
+    constructor(id, title, imageUrl, description, price) {
+        this.id = id;
         this.title = title;
         this.imageUrl = imageUrl;
         this.description = description;
@@ -30,13 +31,23 @@ module.exports = class Product {
     }
 
     save() {
-        this.id = Math.random().toString(); // dummy id value, random enough for this example
         getProductsFromFile(products => {
-            // append product to array of products
-            products.push(this);
-            fs.writeFile(p, JSON.stringify(products), (err) => {
-                console.log('Error writing products file ' + err);
-            });
+            // check if product already exists, if it does we update, otherwise we create a new one
+            if (this.id) {
+                const existingProductIndex = products.findIndex(prod => prod.id === this.id);
+                const updatedProducts = [...products];
+                updatedProducts[existingProductIndex] = this; // replace old product with updated product
+                fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+                    console.log('Error writing products file ' + err);
+                });
+            } else {
+                this.id = Math.random().toString(); // dummy id value, random enough for this example
+                // append product to array of products
+                products.push(this);
+                fs.writeFile(p, JSON.stringify(products), (err) => {
+                    console.log('Error writing products file ' + err);
+                });
+            }
         })
     }
 
