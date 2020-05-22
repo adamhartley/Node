@@ -13,6 +13,8 @@ router.get('/products', shopController.getProducts);
 router.get('/products/:productId', shopController.getProduct) // the colon tells Express to expect a dynamic segment in the request
 // /cart => GET
 router.get('/cart', shopController.getCart);
+// /cart => POST
+router.post('/cart', shopController.postCart);
 // /orders => GET
 router.get('/orders', shopController.getOrders);
 // /checkout => GET
