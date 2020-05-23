@@ -1,5 +1,6 @@
 /*
- * Scripts to create the MySql database
+ * Scripts to create the MySql database for 'manual' setup.
+ * No need to run the create table statements if using an ORM (Sequelize)
  */
 CREATE DATABASE node_webapp;
 

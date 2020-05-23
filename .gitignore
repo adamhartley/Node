@@ -10,3 +10,11 @@
 .idea/
 *.iml
 node_modules/
+express-js/.DS_Store
+.DS_Store
+basics/message.txt
+basics/package-lock.json
+express-js/package-lock.json
+html-templates/package-lock.json
+main-app/package-lock.json
+main-app/package-lock.json

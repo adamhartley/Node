@@ -6,6 +6,7 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const errorController = require('./controllers/error')
 const rootDir = require('./util/path')
+const sequelize = require('./util/database')
 
 // create an express app
 const app = express();
@@ -24,4 +25,11 @@ app.use(shopRoutes); // register shop routes
 // catch all route: if we made it through all the routes, return a 404 page not found
 app.use(errorController.get404)
 
-app.listen(3000);
+sequelize.sync() // tell Sequelize to create tables if they don't exist
+    .then(result => {
+        app.listen(3000);
+    })
+    .catch(err => {
+        console.log(err);
+    })
+;
