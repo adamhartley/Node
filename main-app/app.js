@@ -13,11 +13,9 @@ const app = express();
  * Use the EJS templating engine
  */
 app.set('view engine', 'ejs'); //use EJS engine to compile dynamic templates
-
 app.set('views', 'views'); // where to find the html files (views is the default, but setting it anyway)
 
-// add request parser (body-parser package)
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: false})); // add request parser (body-parser package)
 app.use(express.static(path.join(rootDir, 'public'))); // add public path for static file access
 
 app.use('/admin', adminRoutes); // register admin routes
