@@ -51,7 +51,7 @@ exports.postEditProduct = (req, res, next) => {
     const updateDescription = req.body.description;
     // create a new product instance, and populate it with the updated info
     const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updateDescription, updatedPrice);
-    updatedProduct.save();
+    updatedProduct.save(); // TODO: Add callback to save()
     // save the updated product
     res.redirect('/admin/products')
 }
@@ -64,4 +64,10 @@ exports.getProducts = (req, res, next) => {
             path: '/admin/products'
         });
     });
+}
+
+exports.postDeleteProduct = (req, res, next) => {
+    const prodId = req.body.productId;
+    Product.deleteById(prodId); // TODO: add callback to deleteById()
+    res.redirect('/admin/products');
 }

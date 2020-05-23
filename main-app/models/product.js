@@ -9,6 +9,7 @@ const p = path.join(
     'data',
     'products.json'
 );
+const Cart = require('./cart');
 
 // Helper function to read products from the file
 const getProductsFromFile = callback => {
@@ -45,9 +46,27 @@ module.exports = class Product {
                 // append product to array of products
                 products.push(this);
                 fs.writeFile(p, JSON.stringify(products), (err) => {
-                    console.log('Error writing products file ' + err);
+                    if (err) {
+                        console.log('Error writing products file ' + err);
+                    }
                 });
             }
+        })
+    }
+
+    static deleteById(id) {
+        // get products
+        getProductsFromFile(products => {
+            const product = products.find(prod => prod.id === id);
+            // keep all products where the product id doesn't match the id passed in
+            const updatedProducts = products.filter(prod => prod.id !== id);
+            fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+                if (!err) {
+                    Cart.deleteProduct(id, product.price)
+                } else {
+                    console.log('Error writing products file ' + err);
+                }
+            });
         })
     }
 

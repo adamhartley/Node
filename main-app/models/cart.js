@@ -14,6 +14,9 @@ const p = path.join(
 );
 
 module.exports = class Cart {
+    /*
+     * Add product to cart, update quantity and total cart price
+     */
     static addProduct(id, productPrice) {
         // fetch the previous cart
         fs.readFile(p, (err, fileContent) => {
@@ -46,5 +49,25 @@ module.exports = class Cart {
         })
     }
 
+    /*
+     * Remove item from cart, and update cart total price
+     */
+    static deleteProduct(id, productPrice) {
+        fs.readFile(p, (err, fileContent) => {
+            if (err) {
+                return; // no cart found, nothing to delete
+            }
+            const updatedCart = {...JSON.parse(fileContent)};
+            const product = updatedCart.products.find(prod => prod.id === id);
+            const productQty = product.qty;
+            updatedCart.products = updatedCart.products.filter(prod => prod.id !== id);
+            updatedCart.totalPrice = updatedCart.totalPrice - (productPrice * productQty);
 
+            fs.writeFile(p, JSON.stringify(updatedCart), err => {
+                if (err) {
+                    console.log(err);
+                }
+            })
+        })
+    }
 }
