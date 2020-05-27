@@ -18,7 +18,7 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
 
-    Product.create({
+    req.user.createProduct({ // Sequelize method available as association was configured in app.js
         title: title,
         price: price,
         imageUrl: imageUrl,
@@ -39,8 +39,10 @@ exports.getEditProduct = (req, res, next) => {
         return res.redirect('/')
     }
     const prodId = req.params.productId;
-    Product.findByPk(prodId)
-        .then(product => {
+    // only fetch products for the user currently logged in
+    req.user.getProducts({where: {id: prodId}}) //utilizing Sequelize dynamic method as association defined in app.js
+        .then(products => {
+            const product = products[0]; // returns an array, but we know there is only one product
             if (!product) {
                 return res.redirect('/');
             }
@@ -85,7 +87,7 @@ exports.postEditProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    Product.findAll()
+    req.user.getProducts()
         .then((products) => {
             res.render('admin/products', {
                 prods: products,

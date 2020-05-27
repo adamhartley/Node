@@ -2,7 +2,7 @@
  * The core Product entity
  */
 const Sequelize = require('sequelize');
-const sequelize = require('../util/database');
+const sequelize = require('../util/mysql');
 
 const Product = sequelize.define('product', {
     id:  {

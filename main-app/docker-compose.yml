@@ -1,0 +1,53 @@
+version: "3.3"
+
+networks:
+  my-network:
+    driver: bridge
+
+services:
+  mongodb_container:
+    image: mongo:latest
+    container_name: mongodb_container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: node_user
+      MONGO_INITDB_ROOT_PASSWORD: node_user
+    ports:
+      - 27017:27017
+    volumes:
+      - db_data:/data/db
+    networks:
+      - my-network
+  db:
+    container_name: mysql_container
+    # The image, change 5.7 to any of the supported docker version.
+    image: mysql:5.7
+
+    # Required environment variables.
+    # MYSQL_ROOT_PASSWORD defines the root password of the root user
+    # MYSQL_DATABASE names the DB
+    # MYSQL_USER is the non-root user
+    # MYSQL_PASSWORD is the non-root user password
+    environment:
+      MYSQL_ROOT_PASSWORD: "node_user"
+      MYSQL_DATABASE: "node_webapp"
+      MYSQL_USER: "node_user"
+      MYSQL_PASSWORD: "node_user"
+
+    # What port do you want this MySQL instance to be available on?
+    # The left hand number is what port it will be available on from your machine
+    # perspective.  The right hand number is the post that it's linking up to.
+    # In this case we're saying "link our local 3306 to the docker container's 3306"
+    # which works here, because docker MySQL exposes the MySQL DB to the container's
+    # 3306 port.
+    ports:
+      - 3306:3306
+    networks:
+      - my-network
+    # We're using a named volume here that docker manages for us.  This is a special
+    # place just for this particular dockerized MySQL instance.
+    volumes:
+      - db_data:/var/lib/mysql
+#
+## if you use a named volume, you must also define it here.
+volumes:
+  db_data:
