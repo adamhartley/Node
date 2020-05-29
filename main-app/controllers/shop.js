@@ -2,6 +2,7 @@
  * Shop controller
  */
 const Product = require('../models/product');
+const ProductNoSQL = require('../models/reporting/product')
 
 exports.getProducts = (req, res, next) => {
     Product.findAll()

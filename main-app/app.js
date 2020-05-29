@@ -5,13 +5,15 @@ const path = require('path');
 /* Routes */
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const shopReportingRoutes = require('./routes/reporting/shop-reporting');
+const shopReportingAdminRoutes = require('./routes/reporting/shop-reporting-admin')
 /* Controllers */
 const errorController = require('./controllers/error')
 /* Util */
 const rootDir = require('./util/path')
 /* Database */
 const sequelize = require('./util/mysql')
-const mongoConnect = require('./util/mongodb')
+const mongoConnect = require('./util/mongodb').mongoConnect;
 /* Models */
 const Product = require('./models/product')
 const User = require('./models/user')
@@ -45,6 +47,8 @@ app.use((req, res, next) => { // TODO: clean up
 
 app.use('/admin', adminRoutes); // register admin routes
 app.use(shopRoutes); // register shop routes
+app.use('/reporting', shopReportingRoutes); // register reporting routes
+app.use('/reporting/admin', shopReportingAdminRoutes); // register reporting admin routes
 
 // catch all route: if we made it through all the routes, return a 404 page not found
 app.use(errorController.get404)
@@ -62,6 +66,7 @@ Order.belongsTo(User);
 User.hasMany(Order);
 Order.belongsToMany(Product, {through: OrderItem}); // many-to-many association
 Product.belongsToMany(Order, {through: OrderItem}); // many-to-many association
+
 
 // MySql Seuelize Config
 sequelize.sync() // tell Sequelize to create tables if they don't exist

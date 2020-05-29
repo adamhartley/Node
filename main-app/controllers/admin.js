@@ -3,6 +3,7 @@
  */
 
 const Product = require('../models/product');
+const ProductNoSql = require('../models/reporting/product')
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
@@ -18,12 +19,19 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
 
+    const productNoSql = new ProductNoSql(title, price, description, imageUrl);
+
+
     req.user.createProduct({ // Sequelize method available as association was configured in app.js
         title: title,
         price: price,
         imageUrl: imageUrl,
         description: description
     })
+        .then(result => {
+            console.log('Saving to MongoDB');
+            return productNoSql.save();
+        })
         .then(result => {
             console.log(result);
             return res.redirect('/')

@@ -1,0 +1,44 @@
+.dropdown__btn {
+    background-color: #494949;
+    border: none;
+    padding: 0;
+    color: white;
+    font: inherit;
+}
+
+/* Show the dropdown menu when the user moves the mouse over the dropdown button */
+.dropdown:hover .dropdown__content {
+    display: block;
+    color: white;
+}
+
+.dropdown__btn:hover,
+.dropdown__btn:active {
+    background-color: #494949;
+    color: #00ED00;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+}
+
+/* Style the dropdown content (hidden by default) */
+.dropdown__content {
+    display: none;
+    position: absolute;
+    background-color: #717171;
+    color: white;
+    min-width: 160px;
+    /*box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);*/
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
+    z-index: 1;
+}
+
+.dropdown-content__item-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-content__item:hover {
+    background-color: #494949;
+}

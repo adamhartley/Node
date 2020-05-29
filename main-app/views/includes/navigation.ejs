@@ -14,6 +14,22 @@
                 <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
             </li>
             <li class="main-header__item">
+                <div class="dropdown">
+                    <button class="dropdown__btn">Reporting</button>
+                    <div class="dropdown__content">
+                        <ul class="dropdown-content__item-list">
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/products' ? 'active' : '' %>" href="/reporting/products">Products</a>
+                            </li>
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/admin/add-product' ? 'active' : '' %>"
+                                   href="/reporting/admin/add-product">Add Product</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
+            <li class="main-header__item">
                 <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product</a>
             </li>
             <li class="main-header__item">

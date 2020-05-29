@@ -1,5 +1,5 @@
 /*
- * The core Product entity
+ * Product entity utilizing Sequelize ORM syntax
  */
 const Sequelize = require('sequelize');
 const sequelize = require('../util/mysql');
