@@ -9,7 +9,13 @@
 <body>
 <%- include('../includes/navigation.ejs') %>
 <main>
-    <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
+    <form class="product-form"
+    <% if (reporting) { %>
+          action="/reporting/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>"
+    <% } else { %>
+          action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>"
+            <% } %>
+          method="POST">
         <div class="form-control">
             <label for="title">Title</label>
             <input type="text" name="title" id="title" value="<% if (editing) { %><%= product.title %><% } %>">
@@ -31,8 +37,11 @@
             </textarea>
         </div>
         <!-- hidden input for transmitting the product id in the POST to edit-product  -->
-        <% if (editing) { %>
+        <% if (editing && !reporting) { %>
             <input type="hidden" value="<%= product.id %>" name="productId">
+        <% } %>
+        <% if (editing && reporting) { %>
+            <input type="hidden" value="<%= product._id %>" name="productId">
         <% } %>
 
         <button type="submit">

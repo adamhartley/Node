@@ -5,6 +5,7 @@ const Product = require('../models/product');
 const ProductNoSQL = require('../models/reporting/product')
 
 exports.getProducts = (req, res, next) => {
+    console.log('getProducts')
     Product.findAll()
         .then(products => {
             res.render('shop/product-list', {
@@ -19,9 +20,14 @@ exports.getProducts = (req, res, next) => {
 }
 
 exports.getProduct = (req, res, next) => {
+    console.log('getProduct');
     const prodId = req.params.productId;
+
+    console.log('Request' + req.params.toString())
+    console.log('prodId: ' + prodId)
     Product.findByPk(prodId)
         .then((product) => {
+            console.log('product.title ' + product.title);
             res.render('shop/product-detail', {
                 product: product,
                 pageTitle: product.title,

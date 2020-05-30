@@ -3,13 +3,13 @@
  */
 
 const Product = require('../models/product');
-const ProductNoSql = require('../models/reporting/product')
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
         path: '/admin/add-product',
-        editing: false
+        editing: false,
+        reporting: false
     });
 }
 
@@ -19,19 +19,12 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
 
-    const productNoSql = new ProductNoSql(title, price, description, imageUrl);
-
-
     req.user.createProduct({ // Sequelize method available as association was configured in app.js
         title: title,
         price: price,
         imageUrl: imageUrl,
         description: description
     })
-        .then(result => {
-            console.log('Saving to MongoDB');
-            return productNoSql.save();
-        })
         .then(result => {
             console.log(result);
             return res.redirect('/')
@@ -58,7 +51,8 @@ exports.getEditProduct = (req, res, next) => {
                 pageTitle: 'Edit Product',
                 path: '/admin/edit-product',
                 editing: editMode,
-                product: product
+                product: product,
+                reporting: false
             });
         })
         .catch(err => {
@@ -100,7 +94,8 @@ exports.getProducts = (req, res, next) => {
             res.render('admin/products', {
                 prods: products,
                 pageTitle: 'Admin Product List',
-                path: '/admin/products'
+                path: '/admin/products',
+                reporting: false
             });
         })
         .catch(err => {

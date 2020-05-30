@@ -6,16 +6,25 @@ const getDb = require('../../util/mongodb').getDb;
 const collection = 'products';
 
 class Product {
-    constructor(title, price, description, imageUrl) {
+    constructor(title, price, description, imageUrl, id) {
         this.title = title;
         this.price = price;
         this.description = description;
         this.imageUrl = imageUrl;
+        this._id = id ? mongodb.ObjectID(id) : null;
     }
 
     save() {
         const db = getDb(); // get db connection
-        return db.collection(collection).insertOne(this)
+        let dbOperation;
+        if (this._id) {
+            // update the product
+            dbOperation = db.collection(collection).updateOne({_id: this._id}, {$set: this});
+        } else {
+            // insert new product
+            dbOperation = db.collection(collection).insertOne(this);
+        }
+        return dbOperation
             .then(result => {
                 console.log(result);
             })
@@ -50,6 +59,19 @@ class Product {
             .catch(err => {
                 console.log(err)
             })
+    }
+
+    static deleteById(prodId) {
+        const db = getDb();
+        const mongoProdId = mongodb.ObjectID(prodId);
+        return db.collection(collection)
+            .deleteOne({_id: mongoProdId})
+            .then(result => {
+                console.log('Deleted ' + mongoProdId);
+            })
+            .catch(err => {
+                console.log(err)
+            });
     }
 }
 
