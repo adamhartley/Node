@@ -34,3 +34,22 @@ exports.getProduct = (req, res, next) => {
             console.log(err);
         })
 }
+
+/*
+ * Adds an product to the cart
+ */
+exports.postCart = (req, res, next) => {
+    console.log('posting to reporting cart')
+    const prodId = req.body.productId;
+    ProductReporting.findById(prodId)
+        .then(product => {
+            return req.reportingUser.addToCart(product);
+        })
+        .then(result => {
+            console.log(result);
+            res.redirect('/reporting/cart');
+        })
+        .catch(err => {
+            console.log(err);
+        })
+}

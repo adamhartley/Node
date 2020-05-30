@@ -9,4 +9,7 @@ const router = express.Router();
 router.get('/products', shopReportingController.getProductsReporting);
 
 router.get('/products/:productId', shopReportingController.getProduct) // the colon tells Express to expect a dynamic segment in the request
+
+router.post('/cart', shopReportingController.postCart);
+
 module.exports = router;

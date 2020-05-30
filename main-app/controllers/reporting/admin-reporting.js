@@ -18,8 +18,9 @@ exports.postReportingAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
+    const user = req.reportingUser;
 
-    const productNoSql = new ProductReporting(title, price, description, imageUrl);
+    const productNoSql = new ProductReporting(title, price, description, imageUrl, null, user._id);
     console.log('Saving to MongoDB');
 
     productNoSql.save()
