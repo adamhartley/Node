@@ -53,3 +53,19 @@ exports.postCart = (req, res, next) => {
             console.log(err);
         })
 }
+
+exports.getCart = (req, res, next) => {
+    console.log('reporting controller getCart()');
+    req.reportingUser.getCart()
+        .then(products => {
+            res.render('shop/cart', {
+                path: '/reporting/cart',
+                pageTitle: 'Your Cart',
+                products: products,
+                reporting: true
+            })
+        })
+        .catch(err => {
+            console.log(err)
+        });
+}
