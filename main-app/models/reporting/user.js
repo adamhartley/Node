@@ -3,7 +3,9 @@
  */
 const mongodb = require('mongodb');
 const getDb = require('../../util/mongodb').getDb;
-const collection = 'users';
+const USERS_COLLECTION = 'users';
+const PRODUCTS_COLLECTION = 'products';
+const ORDERS_COLLECTION = 'orders';
 
 class User {
     constructor(username, email, cart, id) {
@@ -18,10 +20,10 @@ class User {
         let dbOperation;
         if (this._id) {
             // update the product
-            dbOperation = db.collection(collection).updateOne({_id: this._id}, {$set: this});
+            dbOperation = db.collection(USERS_COLLECTION).updateOne({_id: this._id}, {$set: this});
         } else {
             // insert new product
-            dbOperation = db.collection(collection).insertOne(this);
+            dbOperation = db.collection(USERS_COLLECTION).insertOne(this);
         }
         return dbOperation
             .then(result => {
@@ -34,7 +36,7 @@ class User {
 
     static findById(userId) {
         const db = getDb();
-        return db.collection(collection)
+        return db.collection(USERS_COLLECTION)
             .find({_id: mongodb.ObjectID(userId)})
             .next()
             .then(user => {
@@ -76,7 +78,7 @@ class User {
         const productIds = this.cart.items.map(item => {
             return item.productId;
         })
-        return db.collection('products')
+        return db.collection(PRODUCTS_COLLECTION)
             .find({_id: {$in: productIds}})
             .toArray()
             .then(products => {
@@ -90,6 +92,51 @@ class User {
                 })
             })
 
+    }
+
+    deleteItemFromCart(productId) {
+        console.log('Deleting reporting cart item...')
+        const updatedCartItems = this.cart.items.filter(item => {
+            return item.productId.toString() !== productId.toString();
+        });
+        const db = getDb();
+        return db.collection(USERS_COLLECTION)
+            .updateOne({_id: mongodb.ObjectID(this._id)},
+                {$set: {cart: {items: updatedCartItems}}}) // update the cart only
+    }
+
+    addOrder() {
+        const db = getDb();
+        return this.getCart()
+            .then(products => {
+                const order = {
+                    items: products,
+                    user: {
+                        _id: mongodb.ObjectID(this._id),
+                        name: this.username,
+                        email: this.email
+                    }
+                };
+                return db.collection(ORDERS_COLLECTION)
+                    .insertOne(order);
+            })
+            .then(result => {
+                // empty the cart, in memory and the db
+                this.cart = {items: []};
+                return db.collection(USERS_COLLECTION)
+                    .updateOne({_id: mongodb.ObjectID(this._id)},
+                        {$set: {cart: {items: []}}})
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
+
+    getOrders() {
+        const db = getDb();
+        return db.collection(ORDERS_COLLECTION)
+            .find({'user._id': mongodb.ObjectID(this._id)})
+            .toArray();
     }
 }
 

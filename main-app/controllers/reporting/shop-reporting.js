@@ -69,3 +69,43 @@ exports.getCart = (req, res, next) => {
             console.log(err)
         });
 }
+
+/*
+ * Deletes a product from the cart
+ */
+exports.postCartDeleteProduct = (req, res, next) => {
+    const prodId = req.body.productId;
+    req.reportingUser.deleteItemFromCart(prodId)
+        .then(result => {
+            res.redirect('/reporting/cart');
+        })
+        .catch(err => {
+            console.log(err)
+        });
+}
+
+exports.postOrder = (req, res, next) => {
+    console.log('Creating reporting order...')
+    req.reportingUser.addOrder()
+        .then(result => {
+            res.redirect('/reporting/orders');
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
+
+exports.getOrders = (req, res, next) => {
+    req.reportingUser.getOrders() // Sequelize eager loading - also fetch the products
+        .then(orders => {
+            res.render('shop/orders', {
+                path: '/reporting/orders',
+                pageTitle: 'Your Orders',
+                orders: orders,
+                reporting: true
+            })
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
