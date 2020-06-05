@@ -10,7 +10,9 @@
 <%- include('../includes/navigation.ejs') %>
 <main>
     <form class="product-form"
-    <% if (reporting) { %>
+    <% if (reporting && useMongoose) { %>
+          action="/reporting/mongoose/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>"
+    <% } else if (reporting && !useMongoose) { %>
           action="/reporting/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>"
     <% } else { %>
           action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>"

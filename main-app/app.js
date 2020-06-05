@@ -7,6 +7,8 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const shopReportingRoutes = require('./routes/reporting/shop-reporting');
 const shopReportingAdminRoutes = require('./routes/reporting/shop-reporting-admin')
+const shopReportingMongooseRoutes = require('./routes/reporting/mongoose/shop-reporting-mongoose')
+const shopReportingAdminMongooseRoutes = require('./routes/reporting/mongoose/shop-reporting-admin-mongoose')
 /* Controllers */
 const errorController = require('./controllers/error')
 /* Util */
@@ -15,6 +17,7 @@ const rootDir = require('./util/path')
 const sequelize = require('./util/mysql')
 const mongoConnect = require('./util/mongodb').mongoConnect;
 const mongodb = require('./util/mongodb');
+const mongoose = require('mongoose');
 /* Models */
 const Product = require('./models/product')
 const User = require('./models/user')
@@ -24,6 +27,8 @@ const Order = require('./models/order')
 const OrderItem = require('./models/order-item')
 /* Reporting Models */
 const ReportingUser = require('./models/reporting/user')
+/* Mongoose Models */
+const MongooseUser = require('./models/reporting/mongoose/user')
 
 // create an express app
 const app = express();
@@ -62,10 +67,24 @@ app.use((req, res, next) => {
         });
 })
 
+/* Mongoose User */
+app.use((req, res, next) => {
+    MongooseUser.findById('5ed7d6456c2aaa3c4b541005')
+        .then(user => {
+            req.mongooseUser = user;
+            next();
+        })
+        .catch(err => {
+            console.log(err);
+        })
+})
+
 app.use('/admin', adminRoutes); // register admin routes
 app.use(shopRoutes); // register shop routes
 app.use('/reporting', shopReportingRoutes); // register reporting routes
 app.use('/reporting/admin', shopReportingAdminRoutes); // register reporting admin routes
+app.use('/reporting/mongoose', shopReportingMongooseRoutes); // register reporting mongoose routes
+app.use('/reporting/mongoose/admin', shopReportingAdminMongooseRoutes); // register reporting admin mongoose routes
 
 // catch all route: if we made it through all the routes, return a 404 page not found
 app.use(errorController.get404)
@@ -100,14 +119,39 @@ sequelize.sync() // tell Sequelize to create tables if they don't exist
     .then(user => {
         return user.createCart();
     })
-    .then(user => {
-        app.listen(3000);
-    })
     .catch(err => {
         console.log(err);
     });
 
 // MongoDB Config
 mongoConnect((client) => {
-    console.log(client);
+    console.log('Conneted to MongoDB!!!');
 })
+
+// Mongoose connect
+mongoose.connect(mongodb.MONGO_URL)
+    .then(result => {
+        console.log('Mongoose has connected to MongoDB!!!');
+
+        // check if a user exists, create one if none are found
+        MongooseUser.findOne()
+            .then(user => {
+                if (!user) {
+                    // create a new user if
+                    const user = new MongooseUser({
+                        name: 'MongooseTestUser',
+                        email: 'mongooseUser@test.com',
+                        cart: {
+                            items: []
+                        }
+                    });
+                    user.save();
+                }
+            });
+
+        app.listen(3000);
+    })
+    .catch(err => {
+        console.log(err);
+    });
+

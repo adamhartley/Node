@@ -20,10 +20,11 @@
                         <p class="product__description"><%= product.description %></p>
                     </div>
                     <div class="card__actions">
-                        <% if (path === '/reporting/products') { %>
+                        <% if (reporting && !useMongoose) { %>
                             <a href="/reporting/products/<%= product._id %>" class="btn">Details</a>
-                        <% } %>
-                        <% if (path === '/products') { %>
+                        <% } else if (reporting && useMongoose) { %>
+                            <a href="/reporting/mongoose/products/<%= product._id %>" class="btn">Details</a>
+                        <% } else { %>
                             <a href="/products/<%= product.id %>" class="btn">Details</a>
                         <% } %>
                         <%- include('../includes/add-to-cart.ejs', {product: product}) %>

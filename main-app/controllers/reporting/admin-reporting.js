@@ -9,7 +9,8 @@ exports.getAddProduct = (req, res, next) => {
         pageTitle: 'Add Product',
         path: '/reporting/admin/add-product',
         editing: false,
-        reporting: true
+        reporting: true,
+        useMongoose: false
     });
 }
 
@@ -62,7 +63,8 @@ exports.getEditProduct = (req, res, next) => {
                 path: '/reporting/admin/edit-product',
                 editing: editMode,
                 product: product,
-                reporting: true
+                reporting: true,
+                useMongoose: false
             });
         })
         .catch(err => {

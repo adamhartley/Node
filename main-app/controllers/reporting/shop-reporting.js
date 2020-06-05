@@ -12,7 +12,9 @@ exports.getProductsReporting = (req, res, next) => {
             res.render('shop/product-list', {
                 prods: products,
                 pageTitle: 'All Products',
-                path: '/reporting/products'
+                path: '/reporting/products',
+                reporting: true,
+                useMongoose: false
             })
         })
         .catch(err => {
@@ -62,7 +64,8 @@ exports.getCart = (req, res, next) => {
                 path: '/reporting/cart',
                 pageTitle: 'Your Cart',
                 products: products,
-                reporting: true
+                reporting: true,
+                useMongoose: false
             })
         })
         .catch(err => {

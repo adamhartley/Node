@@ -1,16 +1,12 @@
-/*
- * Admin controller middleware functions
- */
-
-const Product = require('../models/product');
+const Product = require('../../../models/reporting/mongoose/product');
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
-        path: '/admin/add-product',
+        path: '/reporting/mongoose/admin/add-product',
         editing: false,
-        reporting: false,
-        useMongoose: false
+        reporting: true,
+        useMongoose: true
     });
 }
 
@@ -19,20 +15,40 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
-
-    req.user.createProduct({ // Sequelize method available as association was configured in app.js
+    const user = req.mongooseUser;
+    const product = new Product({
         title: title,
         price: price,
+        description: description,
         imageUrl: imageUrl,
-        description: description
-    })
+        userId: user
+    });
+    product
+        .save()
         .then(result => {
-            console.log(result);
-            return res.redirect('/')
+            console.log('Mongoose created a product!!!');
+            res.redirect('/reporting/mongoose/admin/products');
         })
         .catch(err => {
             console.log(err);
         })
+}
+
+exports.getProducts = (req, res, next) => {
+    Product.find()
+        //.populate('userId') // fetches the entire User object, not just the id
+        .then((products) => {
+            res.render('admin/products', {
+                prods: products,
+                pageTitle: 'Mongoose Admin Product List',
+                path: '/reporting/mongoose/admin/products',
+                reporting: true,
+                useMongoose: true
+            });
+        })
+        .catch(err => {
+            console.log(err)
+        });
 }
 
 exports.getEditProduct = (req, res, next) => {
@@ -42,18 +58,15 @@ exports.getEditProduct = (req, res, next) => {
     }
     const prodId = req.params.productId;
     // only fetch products for the user currently logged in
-    req.user.getProducts({where: {id: prodId}}) //utilizing Sequelize dynamic method as association defined in app.js
-        .then(products => {
-            const product = products[0]; // returns an array, but we know there is only one product
-            if (!product) {
-                return res.redirect('/');
-            }
+    Product.findById(prodId)
+        .then(product => {
             res.render('admin/edit-product', {
                 pageTitle: 'Edit Product',
-                path: '/admin/edit-product',
+                path: '/reporting/mongoose/admin/edit-product',
                 editing: editMode,
                 product: product,
-                reporting: false
+                reporting: true,
+                useMongoose: true
             });
         })
         .catch(err => {
@@ -69,50 +82,28 @@ exports.postEditProduct = (req, res, next) => {
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
     // create a new product instance, and populate it with the updated info
-    const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updateDescription, updatedPrice);
-
-    Product.findByPk(prodId)
+    Product.findById(prodId)
         .then(product => {
             product.title = updatedTitle;
             product.price = updatedPrice;
-            product.imageUrl = updatedImageUrl;
             product.description = updateDescription;
-            return product.save(); // return to avoid nested promise
+            product.imageUrl = updatedImageUrl;
+            return product.save();
         })
         .then(result => {
-            console.log('Updated product!!!');
-            // save the updated product
-            res.redirect('/admin/products');
+            console.log('Mongoose updated the product!!!');
+            res.redirect('/reporting/mongoose/admin/products');
         })
         .catch(err => {
             console.log(err);
         })
 }
 
-exports.getProducts = (req, res, next) => {
-    req.user.getProducts()
-        .then((products) => {
-            res.render('admin/products', {
-                prods: products,
-                pageTitle: 'Admin Product List',
-                path: '/admin/products',
-                reporting: false
-            });
-        })
-        .catch(err => {
-            console.log(err)
-        });
-}
-
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    Product.findByPk(prodId)
-        .then(product => {
-            return product.destroy();
-        })
-        .then(result => {
-            console.log('Destroyed product!!')
-            res.redirect('/admin/products');
+    Product.findByIdAndDelete(prodId)
+        .then(() => {
+            res.redirect('/reporting/mongoose/admin/products');
         })
         .catch(err => {
             console.log(err);

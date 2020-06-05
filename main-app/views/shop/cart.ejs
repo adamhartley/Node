@@ -8,11 +8,21 @@
         <ul class="cart__item-list">
             <% products.forEach(cartProduct => { %>
                 <li class="cart__item">
-                    <h1><%= cartProduct.title %></h1>
-                    <% if (reporting) { %>
+                    <% if (useMongoose) { %>
+                        <h1><%= cartProduct.productId.title %></h1>
+                    <% } else { %>
+                        <h1><%= cartProduct.title %></h1>
+                    <% } %>
+                    <% if (reporting && !useMongoose) { %>
                         <h2>Quantity: <%= cartProduct.quantity %></h2>
                         <form action="/reporting/cart-delete-item" method="POST">
                             <input type="hidden" value="<%= cartProduct._id %>" name="productId">
+                            <button class="btn danger" type="submit">Delete</button>
+                        </form>
+                    <% } else if (reporting && useMongoose) { %>
+                        <h2>Quantity: <%= cartProduct.quantity %></h2>
+                        <form action="/reporting/mongoose/cart-delete-item" method="POST">
+                            <input type="hidden" value="<%= cartProduct.productId._id %>" name="productId">
                             <button class="btn danger" type="submit">Delete</button>
                         </form>
                     <% } else { %>

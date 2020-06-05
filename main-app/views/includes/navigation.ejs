@@ -46,6 +46,35 @@
                     </div>
                 </div>
             </li>
+            <li class="main-header__item">
+                <div class="dropdown">
+                    <button class="dropdown__btn">Mongoose</button>
+                    <div class="dropdown__content">
+                        <ul class="dropdown-content__item-list">
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/mongoose/products' ? 'active' : '' %>"
+                                   href="/reporting/mongoose/products">Products</a>
+                            </li>
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/mongoose/admin/add-product' ? 'active' : '' %>"
+                                   href="/reporting/mongoose/admin/add-product">Add Product</a>
+                            </li>
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/mongoose/admin/products' ? 'active' : '' %>"
+                                   href="/reporting/mongoose/admin/products">Admin Reporting Products</a>
+                            </li>
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/mongoose/cart' ? 'active' : '' %>"
+                                   href="/reporting/mongoose/cart">Cart</a>
+                            </li>
+                            <li class="dropdown-content__item">
+                                <a class="<%= path === '/reporting/mongoose/orders' ? 'active' : '' %>" href="/reporting/mongoose/orders">Orders</a>
+                            </li>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </li>
         </ul>
     </nav>
 </header>

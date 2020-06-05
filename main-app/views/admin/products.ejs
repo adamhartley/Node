@@ -20,7 +20,13 @@
                         <p class="product__description"><%= product.description %></p>
                     </div>
                     <div class="card__actions">
-                        <% if (reporting) { %>
+                        <% if (reporting && useMongoose) { %>
+                            <a href="/reporting/mongoose/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
+                            <form action="/reporting/mongoose/admin/delete-product" method="POST">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                <button class="btn" type="submit">Delete</button>
+                            </form>
+                        <% } else if (reporting && !useMongoose) { %>
                             <a href="/reporting/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>
                             <form action="/reporting/admin/delete-product" method="POST">
                                 <input type="hidden" name="productId" value="<%= product._id %>">

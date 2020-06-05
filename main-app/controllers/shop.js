@@ -11,7 +11,9 @@ exports.getProducts = (req, res, next) => {
             res.render('shop/product-list', {
                 prods: products,
                 pageTitle: 'All Products',
-                path: '/products'
+                path: '/products',
+                reporting: true,
+                useMongoose: false
             })
         })
         .catch(err => {
@@ -62,7 +64,8 @@ exports.getCart = (req, res, next) => {
                         path: '/cart',
                         pageTitle: 'Your Cart',
                         products: products,
-                        reporting: false
+                        reporting: false,
+                        useMongoose: false
                     });
                 })
                 .catch(err => {
