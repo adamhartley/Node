@@ -27,23 +27,25 @@
                         </form>
                     <% } else { %>
                         <h2>Quantity: <%= cartProduct.cartItem.quantity %></h2>
-                        <form action="/cart-delete-item" method="POST">
-                            <input type="hidden" value="<%= cartProduct.id %>" name="productId">
-                            <button class="btn danger" type="submit">Delete</button>
-                        </form>
-                    <% } %>
+                            <form action="/cart-delete-item" method="POST">
+                                <input type="hidden" value="<%= cartProduct.id %>" name="productId">
+                                <button class="btn danger" type="submit">Delete</button>
+                            </form>
+                        <% } %>
                 </li>
             <% }) %>
         </ul>
         <hr>
         <div class="centered">
-            <% if (reporting) { %>
-            <form action="/reporting/create-order" method="POST">
-                <% } else { %>
-                <form action="/create-order" method="POST">
-                    <% } %>
-                    <button type="submit" class="btn">Order Now!</button>
-                </form>
+            <% if (reporting && useMongoose) { %>
+            <form action="/reporting/mongoose/create-order" method="POST">
+                <% } else if (reporting && !useMongoose) { %>
+                <form action="/reporting/create-order" method="POST">
+                    <% } else { %>
+                    <form action="/create-order" method="POST">
+                        <% } %>
+                        <button type="submit" class="btn">Order Now!</button>
+                    </form>
         </div>
     <% } else { %>
         <h1>No products in Cart!</h1>

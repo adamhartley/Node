@@ -1,4 +1,9 @@
+/*
+ * Mongoose ODM Shop controller
+ */
+
 const Product = require('../../../models/reporting/mongoose/product');
+const Order = require('../../../models/reporting/mongoose/order');
 
 exports.getProducts = (req, res, next) => {
     Product.find()
@@ -85,4 +90,53 @@ exports.postCartDeleteProduct = (req, res, next) => {
         .catch(err => {
             console.log(err)
         });
+}
+
+exports.postOrder = (req, res, next) => {
+    console.log('Creating mongoose order...');
+
+    req.mongooseUser
+        .populate('cart.items.productId')
+        .execPopulate()
+        .then(user => {
+            // fetch all the products in the user's cart
+            const products = user.cart.items.map(item => {
+                return {quantity: item.quantity, product: {...item.productId._doc}};
+            });
+
+            // create a new order, add products collected from cart
+            const order = new Order({
+                user: {
+                    name: req.mongooseUser.name,
+                    userId: req.mongooseUser
+                },
+                items: products
+            });
+            return order.save();
+        })
+        .then(() => {
+            return req.mongooseUser.clearCart();
+        })
+        .then(() => {
+            res.redirect('/reporting/mongoose/orders');
+        })
+        .catch(err => {
+            console.log(err)
+        })
+}
+
+exports.getOrders = (req, res, next) => {
+    Order.find({'user.userId': req.mongooseUser._id})
+        .then(orders => {
+            res.render('shop/orders', {
+                path: '/reporting/mongoose/orders',
+                pageTitle: 'Your Orders',
+                orders: orders,
+                reporting: true,
+                useMongoose: true
+            })
+        })
+        .catch(err => {
+            console.log(err)
+        })
 }

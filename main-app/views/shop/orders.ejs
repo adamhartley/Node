@@ -16,10 +16,16 @@
                         <h1>Order - # <%= order.id %></h1>
                     <% } %>
                     <ul class="orders__products">
-                        <% if (reporting) { %>
+                        <% if (reporting && !useMongoose) { %>
                             <% order.items.forEach(product => { %>
                                 <li class="orders__products-item">
                                     <%= product.title %> (<%= product.quantity %>)
+                                </li>
+                            <% }); %>
+                        <% } else if (reporting && useMongoose) { %>
+                            <% order.items.forEach(product => { %>
+                                <li class="orders__products-item">
+                                    <%= product.product.title %> (<%= product.quantity %>)
                                 </li>
                             <% }); %>
                         <% } else { %>

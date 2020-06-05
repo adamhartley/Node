@@ -176,7 +176,8 @@ exports.getOrders = (req, res, next) => {
                 path: '/orders',
                 pageTitle: 'Your Orders',
                 orders: orders,
-                reporting: false
+                reporting: false,
+                useMongoose: false
             })
         })
         .catch(err => {

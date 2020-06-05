@@ -15,4 +15,9 @@ router.post('/cart', mongooseController.postCart);
 
 router.post('/cart-delete-item', mongooseController.postCartDeleteProduct);
 
+router.post('/create-order', mongooseController.postOrder);
+
+router.get('/orders', mongooseController.getOrders);
+
+
 module.exports = router;
