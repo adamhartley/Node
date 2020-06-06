@@ -7,18 +7,20 @@
             <li class="main-header__item">
                 <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
             </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product</a>
-            </li>
-            <li class="main-header__item">
-                <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products</a>
-            </li>
+            <% if (isAuthenticated) { %>
+                <li class="main-header__item">
+                    <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product</a>
+                </li>
+                <li class="main-header__item">
+                    <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products</a>
+                </li>
+            <% } %>
             <li class="main-header__item">
                 <div class="dropdown">
                     <button class="dropdown__btn">Reporting</button>
@@ -27,20 +29,22 @@
                             <li class="dropdown-content__item">
                                 <a class="<%= path === '/reporting/products' ? 'active' : '' %>" href="/reporting/products">Products</a>
                             </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/admin/add-product' ? 'active' : '' %>"
-                                   href="/reporting/admin/add-product">Add Product</a>
-                            </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/admin/products' ? 'active' : '' %>"
-                                   href="/reporting/admin/products">Admin Reporting Products</a>
-                            </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/cart' ? 'active' : '' %>" href="/reporting/cart">Cart</a>
-                            </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/orders' ? 'active' : '' %>" href="/reporting/orders">Orders</a>
-                            </li>
+                            <% if (isAuthenticated) { %>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/admin/add-product' ? 'active' : '' %>"
+                                       href="/reporting/admin/add-product">Add Product</a>
+                                </li>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/admin/products' ? 'active' : '' %>"
+                                       href="/reporting/admin/products">Admin Reporting Products</a>
+                                </li>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/cart' ? 'active' : '' %>" href="/reporting/cart">Cart</a>
+                                </li>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/orders' ? 'active' : '' %>" href="/reporting/orders">Orders</a>
+                                </li>
+                            <% } %>
                             </li>
                         </ul>
                     </div>
@@ -55,26 +59,44 @@
                                 <a class="<%= path === '/reporting/mongoose/products' ? 'active' : '' %>"
                                    href="/reporting/mongoose/products">Products</a>
                             </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/mongoose/admin/add-product' ? 'active' : '' %>"
-                                   href="/reporting/mongoose/admin/add-product">Add Product</a>
-                            </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/mongoose/admin/products' ? 'active' : '' %>"
-                                   href="/reporting/mongoose/admin/products">Admin Reporting Products</a>
-                            </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/mongoose/cart' ? 'active' : '' %>"
-                                   href="/reporting/mongoose/cart">Cart</a>
-                            </li>
-                            <li class="dropdown-content__item">
-                                <a class="<%= path === '/reporting/mongoose/orders' ? 'active' : '' %>" href="/reporting/mongoose/orders">Orders</a>
-                            </li>
+                            <% if (isAuthenticated) { %>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/mongoose/admin/add-product' ? 'active' : '' %>"
+                                       href="/reporting/mongoose/admin/add-product">Add Product</a>
+                                </li>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/mongoose/admin/products' ? 'active' : '' %>"
+                                       href="/reporting/mongoose/admin/products">Admin Reporting Products</a>
+                                </li>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/mongoose/cart' ? 'active' : '' %>"
+                                       href="/reporting/mongoose/cart">Cart</a>
+                                </li>
+                                <li class="dropdown-content__item">
+                                    <a class="<%= path === '/reporting/mongoose/orders' ? 'active' : '' %>"
+                                       href="/reporting/mongoose/orders">Orders</a>
+                                </li>
+                            <% } %>
                             </li>
                         </ul>
                     </div>
                 </div>
             </li>
+        </ul>
+
+        <ul class="main-header__item-list">
+            <% if (!isAuthenticated) { %>
+                <li class="main-header__item">
+                    <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
+                </li>
+            <% } %>
+            <% if (isAuthenticated) { %>
+                <li class="main-header__item">
+                    <form action="/logout" method="POST">
+                        <button type="submit">Logout</button>
+                    </form>
+                </li>
+            <% } %>
         </ul>
     </nav>
 </header>

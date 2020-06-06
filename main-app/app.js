@@ -1,8 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const session = require('express-session')
+const MongoDbSessionStore = require('connect-mongodb-session')(session);
 
 /* Routes */
+const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const shopReportingRoutes = require('./routes/reporting/shop-reporting');
@@ -32,6 +35,11 @@ const MongooseUser = require('./models/reporting/mongoose/user')
 
 // create an express app
 const app = express();
+// create an instance of mongoDb session store
+const sessionStore = new MongoDbSessionStore({
+    uri: mongodb.MONGO_URL,
+    collection: 'sessions'
+});
 /*
  * Use the EJS templating engine
  */
@@ -40,6 +48,12 @@ app.set('views', 'views'); // where to find the html files (views is the default
 
 app.use(bodyParser.urlencoded({extended: false})); // add request parser (body-parser package)
 app.use(express.static(path.join(rootDir, 'public'))); // add public path for static file access
+app.use(session({ // configure session middleware
+    secret: 'my secret',
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore
+}));
 
 /* Standard User */
 app.use((req, res, next) => { // TODO: clean up
@@ -55,7 +69,11 @@ app.use((req, res, next) => { // TODO: clean up
 
 /* Reporting User */
 app.use((req, res, next) => {
-    ReportingUser.findById('5ed2c9f6838f3220325b0bb0')
+    if (!req.session.reportingUser) {
+        return next();
+    }
+    // ReportingUser.findById('5ed2c9f6838f3220325b0bb0')
+    ReportingUser.findById(req.session.reportingUser._id)
         .then(user => {
             /* create and adding the user to the request object allows us to call ReportingUser methods
                on the object being passed around (e.g. see controllers/reporting/shop-reporting/postCart()) */
@@ -69,7 +87,10 @@ app.use((req, res, next) => {
 
 /* Mongoose User */
 app.use((req, res, next) => {
-    MongooseUser.findById('5ed7d6456c2aaa3c4b541005')
+    if (!req.session.mongooseUser) {
+        return next();
+    }
+    MongooseUser.findById(req.session.mongooseUser._id)
         .then(user => {
             req.mongooseUser = user;
             next();
@@ -85,6 +106,7 @@ app.use('/reporting', shopReportingRoutes); // register reporting routes
 app.use('/reporting/admin', shopReportingAdminRoutes); // register reporting admin routes
 app.use('/reporting/mongoose', shopReportingMongooseRoutes); // register reporting mongoose routes
 app.use('/reporting/mongoose/admin', shopReportingAdminMongooseRoutes); // register reporting admin mongoose routes
+app.use(authRoutes);
 
 // catch all route: if we made it through all the routes, return a 404 page not found
 app.use(errorController.get404)

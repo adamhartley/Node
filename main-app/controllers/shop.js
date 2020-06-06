@@ -13,7 +13,8 @@ exports.getProducts = (req, res, next) => {
                 pageTitle: 'All Products',
                 path: '/products',
                 reporting: true,
-                useMongoose: false
+                useMongoose: false,
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -33,7 +34,8 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-detail', {
                 product: product,
                 pageTitle: product.title,
-                path: '/products'
+                path: '/products',
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -47,7 +49,10 @@ exports.getIndex = (req, res, next) => {
             res.render('shop/index', {
                 prods: products,
                 pageTitle: 'Shop',
-                path: '/'
+                path: '/',
+                reporting: false,
+                useMongoose: false,
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -65,7 +70,8 @@ exports.getCart = (req, res, next) => {
                         pageTitle: 'Your Cart',
                         products: products,
                         reporting: false,
-                        useMongoose: false
+                        useMongoose: false,
+                        isAuthenticated: req.session.isLoggedIn
                     });
                 })
                 .catch(err => {
@@ -177,7 +183,8 @@ exports.getOrders = (req, res, next) => {
                 pageTitle: 'Your Orders',
                 orders: orders,
                 reporting: false,
-                useMongoose: false
+                useMongoose: false,
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -188,6 +195,7 @@ exports.getOrders = (req, res, next) => {
 exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
         path: '/checkout',
-        pageTitle: 'Checkout'
+        pageTitle: 'Checkout',
+        isAuthenticated: req.session.isLoggedIn
     })
 }

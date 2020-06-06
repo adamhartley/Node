@@ -49,3 +49,12 @@ processing.
 ## Routes
 All available endpoints are defined in the `routes` package. Routes meant only for administrator users can be found within the `admin.js` 
 file. Routes available to all users can be found within the `shop.js` file. 
+
+In order to experiment/showcase different datastores, routes are divided into two distinct paths: relational (located in `routes`), and NoSQL
+(located in `routes/reporting`). All route files located within `routes/reporting` utilize a NoSQL (MongoDB). Several approaches are demonstrated
+here. One using a querying approach utilizing native MongoDB syntax, and a second using the Mongoose ODM library. All routes using Mongoose
+can be found uner `routes/reporting/mongoose`.
+
+## Authentication
+Session information is handled and stored utilizing `express-session` and `connect-mongodb-session` libraries. 
+ 

@@ -14,7 +14,8 @@ exports.getProducts = (req, res, next) => {
                 pageTitle: 'All Mongoose Products',
                 path: '/reporting/mongoose/products',
                 reporting: true,
-                useMongoose: true
+                useMongoose: true,
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -29,7 +30,8 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-detail', {
                 product: product,
                 pageTitle: product.title,
-                path: 'reporting/mongoose/products'
+                path: 'reporting/mongoose/products',
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -69,7 +71,8 @@ exports.getCart = (req, res, next) => {
                 pageTitle: 'Your Cart',
                 products: products,
                 reporting: true,
-                useMongoose: true
+                useMongoose: true,
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -133,7 +136,8 @@ exports.getOrders = (req, res, next) => {
                 pageTitle: 'Your Orders',
                 orders: orders,
                 reporting: true,
-                useMongoose: true
+                useMongoose: true,
+                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
