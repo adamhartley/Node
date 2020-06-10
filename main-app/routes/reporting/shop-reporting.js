@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 
 const shopReportingController = require('../../controllers/reporting/shop-reporting')
+const isAuth = require('../../middleware/is-auth')
 
 const router = express.Router();
 
@@ -10,14 +11,14 @@ router.get('/products', shopReportingController.getProductsReporting);
 
 router.get('/products/:productId', shopReportingController.getProduct) // the colon tells Express to expect a dynamic segment in the request
 
-router.get('/cart', shopReportingController.getCart);
+router.get('/cart', isAuth, shopReportingController.getCart);
 
-router.post('/cart', shopReportingController.postCart);
+router.post('/cart', isAuth, shopReportingController.postCart);
 
-router.post('/cart-delete-item', shopReportingController.postCartDeleteProduct);
+router.post('/cart-delete-item', isAuth, shopReportingController.postCartDeleteProduct);
 
-router.post('/create-order', shopReportingController.postOrder);
+router.post('/create-order', isAuth, shopReportingController.postOrder);
 
-router.get('/orders', shopReportingController.getOrders);
+router.get('/orders', isAuth, shopReportingController.getOrders);
 
 module.exports = router;

@@ -57,7 +57,12 @@ app.use(session({ // configure session middleware
 
 /* Standard User */
 app.use((req, res, next) => { // TODO: clean up
-    User.findByPk(1)
+    if (!req.session.user) {
+        console.log('MySQL session user not defined!')
+        return next();
+    }
+    console.log('Fetching MySQL session data for user');
+    User.findByPk(req.session.user)
         .then(user => {
             req.user = user; // store Sequelize object for use elsewhere in the app
             next();
@@ -72,7 +77,6 @@ app.use((req, res, next) => {
     if (!req.session.reportingUser) {
         return next();
     }
-    // ReportingUser.findById('5ed2c9f6838f3220325b0bb0')
     ReportingUser.findById(req.session.reportingUser._id)
         .then(user => {
             /* create and adding the user to the request object allows us to call ReportingUser methods
@@ -128,22 +132,22 @@ Product.belongsToMany(Order, {through: OrderItem}); // many-to-many association
 
 // MySql Seuelize Config
 sequelize.sync() // tell Sequelize to create tables if they don't exist
-    .then(result => {
-        User.findByPk(1); // TODO: remove after authentication is configured
-
-    })
-    .then(user => {
-        if (!user) {
-            return User.create({name: 'Test', email: 'testUser@test.com'})
-        }
-        return user;
-    })
-    .then(user => {
-        return user.createCart();
-    })
-    .catch(err => {
-        console.log(err);
-    });
+// .then(result => {
+//     User.findByPk(1); // TODO: remove after authentication is configured
+//
+// })
+// .then(user => {
+//     if (!user) {
+//         return User.create({name: 'Test', email: 'testUser@test.com', password: 'password'})
+//     }
+//     return user;
+// })
+// .then(user => {
+//     return user.createCart();
+// })
+// .catch(err => {
+//     console.log(err);
+// });
 
 // MongoDB Config
 mongoConnect((client) => {
@@ -156,20 +160,20 @@ mongoose.connect(mongodb.MONGO_URL)
         console.log('Mongoose has connected to MongoDB!!!');
 
         // check if a user exists, create one if none are found
-        MongooseUser.findOne()
-            .then(user => {
-                if (!user) {
-                    // create a new user if
-                    const user = new MongooseUser({
-                        name: 'MongooseTestUser',
-                        email: 'mongooseUser@test.com',
-                        cart: {
-                            items: []
-                        }
-                    });
-                    user.save();
-                }
-            });
+        // MongooseUser.findOne()
+        //     .then(user => {
+        //         if (!user) {
+        //             // create a new user if
+        //             const user = new MongooseUser({
+        //                 name: 'MongooseTestUser',
+        //                 email: 'mongooseUser@test.com',
+        //                 cart: {
+        //                     items: []
+        //                 }
+        //             });
+        //             user.save();
+        //         }
+        //     });
 
         app.listen(3000);
     })

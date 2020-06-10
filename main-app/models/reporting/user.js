@@ -8,11 +8,12 @@ const PRODUCTS_COLLECTION = 'products';
 const ORDERS_COLLECTION = 'orders';
 
 class User {
-    constructor(username, email, cart, id) {
+    constructor(username, email, cart, id, password) {
         this.username = username;
         this.email = email;
         this.cart = cart; // cart is an object which contains an array of items
         this._id = id ? mongodb.ObjectID(id) : null;
+        this.password = password;
     }
 
     save() {
@@ -38,6 +39,20 @@ class User {
         const db = getDb();
         return db.collection(USERS_COLLECTION)
             .find({_id: mongodb.ObjectID(userId)})
+            .next()
+            .then(user => {
+                console.log(user);
+                return user;
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+
+    static findByEmail(email) {
+        const db = getDb();
+        return db.collection(USERS_COLLECTION)
+            .find({email: email})
             .next()
             .then(user => {
                 console.log(user);

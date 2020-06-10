@@ -2,19 +2,20 @@ const express = require('express');
 const path = require('path');
 
 const shopReportingController = require('../../controllers/reporting/admin-reporting')
+const isAuth = require('../../middleware/is-auth')
 
 const router = express.Router();
 
-router.get('/add-product', shopReportingController.getAddProduct);
+router.get('/add-product', isAuth, shopReportingController.getAddProduct)
 
-router.post('/add-product', shopReportingController.postReportingAddProduct);
+router.post('/add-product', isAuth, shopReportingController.postReportingAddProduct)
 
-router.get('/products', shopReportingController.getProducts);
+router.get('/products', isAuth, shopReportingController.getProducts)
 
-router.get('/edit-product/:productId', shopReportingController.getEditProduct);
+router.get('/edit-product/:productId', isAuth, shopReportingController.getEditProduct)
 
-router.post('/edit-product', shopReportingController.postEditProduct)
+router.post('/edit-product', isAuth, shopReportingController.postEditProduct)
 
-router.post('/delete-product', shopReportingController.postDeleteProduct)
+router.post('/delete-product', isAuth, shopReportingController.postDeleteProduct)
 
 module.exports = router;
