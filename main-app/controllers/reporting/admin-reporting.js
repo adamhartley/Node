@@ -35,13 +35,14 @@ exports.postReportingAddProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    ProductReporting.fetchAll()
+    ProductReporting.fetchAllForUser(req.reportingUser._id)
         .then((products) => {
             res.render('admin/products', {
                 prods: products,
                 pageTitle: 'Admin Product List',
                 path: '/reporting/admin/products',
-                reporting: true
+                reporting: true,
+                useMongoose: false
             });
         })
         .catch(err => {
@@ -80,9 +81,18 @@ exports.postEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
+
+    const prod = ProductReporting.findById(prodId);
+    // check if current user owns product to be edited
+    if (prod.userId.toString() !== req.reportingUser._id.toString()) {
+        console.log('User attempting to edit product which they do not own!!!');
+        return res.redirect('/');
+    }
+
     // create a new product instance, and populate it with the updated info
     const updatedProduct = new ProductReporting(updatedTitle, updatedPrice, updateDescription, updatedImageUrl, mongodb.ObjectID(prodId));
     console.log(updatedProduct);
+
     updatedProduct.save()
         .then(result => {
             console.log('Updated product!!!');
@@ -96,7 +106,8 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    ProductReporting.deleteById(prodId)
+    const userId = req.reportingUser._id;
+    ProductReporting.deleteById(prodId, userId)
         .then(() => {
             res.redirect('/reporting/admin/products');
         })

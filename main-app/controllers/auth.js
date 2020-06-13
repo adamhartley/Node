@@ -167,10 +167,19 @@ exports.getReset = (req, res, next) => {
         errorMessage = null;
     }
 
+    let userMessage = req.flash('userMessage');
+
+    if (userMessage.length > 0) {
+        userMessage = userMessage[0];
+    } else {
+        userMessage = null;
+    }
+
     res.render('auth/reset', {
         path: '/reset',
         pageTitle: 'Reset Password',
-        errorMessage: errorMessage
+        errorMessage: errorMessage,
+        userMessage: userMessage
     });
 }
 
@@ -181,8 +190,6 @@ exports.postReset = (req, res, next) => {
             return res.redirect('/reset');
         }
         const token = buffer.toString('hex');
-
-        console.log('email : ' + req.body.email);
         // find user which we're trying to reset
         MongooseUser.findOne({email: req.body.email})
             .then(user => {
@@ -196,8 +203,11 @@ exports.postReset = (req, res, next) => {
             })
             .then(result => {
                 if (result) {
+                    req.flash('userMessage', 'Reset password link has been sent to your inbox');
                     // send token reset email, faking with log message
                     console.log('Dear user, a password reset email has been requested, click this link to reset: http://localhost:3000/reset/' + token);
+                    return res.redirect('/reset');
+
                 }
             })
             .catch(err => {
@@ -224,8 +234,54 @@ exports.getNewPassword = (req, res, next) => {
                 path: '/new-password',
                 pageTitle: 'New Password',
                 errorMessage: errorMessage,
+                passwordToken: token,
                 mongooseUserId: user._id.toString()
             });
+        })
+        .catch(err => {
+            console.log(err);
+        })
+}
+
+exports.postNewPassword = (req, res, next) => {
+    const newPassword = req.body.password;
+    const mongooseUserId = req.body.mongooseUserId;
+    const token = req.body.passwordToken;
+    let mongooseUser;
+    let hashedPassword
+
+    MongooseUser.findOne({
+        resetToken: token,
+        resetTokenExpiration: {$gt: Date.now()},
+        _id: mongooseUserId
+    })
+        .then(user => {
+            mongooseUser = user;
+            return bcrypt.hash(newPassword, 12)
+                .then(pw => {
+                    hashedPassword = pw;
+                });
+        })
+        .then(() => {
+            User.findAll({where: {email: mongooseUser.email}})
+                .then(users => {
+                    return users[0];
+                })
+                .then(user => {
+                    console.log('Updating mySql user...');
+                    user.password = hashedPassword;
+                    return user.save();
+                })
+        })
+        .then(() => {
+            mongooseUser.password = hashedPassword;
+            mongooseUser.resetToken = undefined;
+            mongooseUser.resetTokenExpiration = undefined;
+            console.log('Updating mongoUser...');
+            return mongooseUser.save();
+        })
+        .then(() => {
+            res.redirect('/login');
         })
         .catch(err => {
             console.log(err);

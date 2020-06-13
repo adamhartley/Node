@@ -5,7 +5,7 @@
 CREATE DATABASE node_webapp;
 
 CREATE USER 'node_user'@'localhost' IDENTIFIED BY 'node_user';
-GRANT ALL ON *.* to 'node_user'@'%' IDENTIFIED BY 'node_user'; # TODO: restrict user privileges
+GRANT ALL PRIVILEGES ON *.* to 'node_user'@'%' IDENTIFIED BY 'node_user'; # TODO: restrict user privileges
 
 CREATE TABLE IF NOT EXISTS node_webapp.Products
 (

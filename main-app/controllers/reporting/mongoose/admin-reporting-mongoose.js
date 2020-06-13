@@ -35,7 +35,7 @@ exports.postAddProduct = (req, res, next) => {
 }
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
+    Product.find({userId: req.mongooseUser._id})  // only fetch products for editing which were created by the logged in user
         //.populate('userId') // fetches the entire User object, not just the id
         .then((products) => {
             res.render('admin/products', {
@@ -81,18 +81,24 @@ exports.postEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
+
     // create a new product instance, and populate it with the updated info
     Product.findById(prodId)
         .then(product => {
+            // confirm that product belongs to user
+            if (product.userId.toString() !== req.mongooseUser._id.toString()) {
+                console.log('User attempting to edit product which they do not own!!!');
+                return res.redirect('/');
+            }
             product.title = updatedTitle;
             product.price = updatedPrice;
             product.description = updateDescription;
             product.imageUrl = updatedImageUrl;
-            return product.save();
-        })
-        .then(result => {
-            console.log('Mongoose updated the product!!!');
-            res.redirect('/reporting/mongoose/admin/products');
+            return product.save()
+                .then(result => {
+                    console.log('Mongoose updated the product!!!');
+                    res.redirect('/reporting/mongoose/admin/products');
+                });
         })
         .catch(err => {
             console.log(err);
@@ -101,7 +107,7 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productId;
-    Product.findByIdAndDelete(prodId)
+    Product.deleteOne({_id: prodId, userId: req.mongooseUser._id})
         .then(() => {
             res.redirect('/reporting/mongoose/admin/products');
         })

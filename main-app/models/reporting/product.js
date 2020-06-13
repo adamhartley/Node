@@ -48,6 +48,20 @@ class Product {
             });
     }
 
+    static fetchAllForUser(userId) {
+        const db = getDb();
+        return db.collection(collection)
+            .find({userId: userId})
+            .toArray() // TODO: replace toArray with pagination
+            .then(products => {
+                console.log(products);
+                return products;
+            })
+            .catch(err => {
+                console.log(err)
+            });
+    }
+
     static findById(prodId) {
         const db = getDb();
         return db.collection(collection)
@@ -62,11 +76,11 @@ class Product {
             })
     }
 
-    static deleteById(prodId) {
+    static deleteById(prodId, userId) {
         const db = getDb();
         const mongoProdId = mongodb.ObjectID(prodId);
         return db.collection(collection)
-            .deleteOne({_id: mongoProdId})
+            .deleteOne({_id: mongoProdId, userId: userId})
             .then(result => {
                 console.log('Deleted ' + mongoProdId);
             })
