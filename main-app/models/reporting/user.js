@@ -8,12 +8,14 @@ const PRODUCTS_COLLECTION = 'products';
 const ORDERS_COLLECTION = 'orders';
 
 class User {
-    constructor(username, email, cart, id, password) {
+    constructor(username, email, cart, id, password, resetToken = null, resetTokenExpiration = null) {
         this.username = username;
         this.email = email;
         this.cart = cart; // cart is an object which contains an array of items
         this._id = id ? mongodb.ObjectID(id) : null;
         this.password = password;
+        this.resetToken = resetToken;
+        this.resetTokenExpiration = resetTokenExpiration;
     }
 
     save() {

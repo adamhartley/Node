@@ -16,22 +16,25 @@
                     <% if (reporting && !useMongoose) { %>
                         <h2>Quantity: <%= cartProduct.quantity %></h2>
                         <form action="/reporting/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                             <input type="hidden" value="<%= cartProduct._id %>" name="productId">
                             <button class="btn danger" type="submit">Delete</button>
                         </form>
                     <% } else if (reporting && useMongoose) { %>
                         <h2>Quantity: <%= cartProduct.quantity %></h2>
                         <form action="/reporting/mongoose/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                             <input type="hidden" value="<%= cartProduct.productId._id %>" name="productId">
                             <button class="btn danger" type="submit">Delete</button>
                         </form>
                     <% } else { %>
                         <h2>Quantity: <%= cartProduct.cartItem.quantity %></h2>
-                            <form action="/cart-delete-item" method="POST">
-                                <input type="hidden" value="<%= cartProduct.id %>" name="productId">
-                                <button class="btn danger" type="submit">Delete</button>
-                            </form>
-                        <% } %>
+                        <form action="/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" value="<%= cartProduct.id %>" name="productId">
+                            <button class="btn danger" type="submit">Delete</button>
+                        </form>
+                    <% } %>
                 </li>
             <% }) %>
         </ul>
@@ -45,6 +48,7 @@
                     <form action="/create-order" method="POST">
                         <% } %>
                         <button type="submit" class="btn">Order Now!</button>
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                     </form>
         </div>
     <% } else { %>

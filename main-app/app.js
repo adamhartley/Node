@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const session = require('express-session')
 const MongoDbSessionStore = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+const flash = require('connect-flash')
 
 /* Routes */
 const authRoutes = require('./routes/auth');
@@ -54,9 +56,14 @@ app.use(session({ // configure session middleware
     saveUninitialized: false,
     store: sessionStore
 }));
+// Initialize connect-flash
+app.use(flash());
+// Initialize CSRF attack prevention package
+const csrfProtection = csrf({});
+app.use(csrfProtection);
 
 /* Standard User */
-app.use((req, res, next) => { // TODO: clean up
+app.use((req, res, next) => {
     if (!req.session.user) {
         console.log('MySQL session user not defined!')
         return next();
@@ -104,6 +111,13 @@ app.use((req, res, next) => {
         })
 })
 
+// Utilize locals property to add params to all rendered views
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+})
+
 app.use('/admin', adminRoutes); // register admin routes
 app.use(shopRoutes); // register shop routes
 app.use('/reporting', shopReportingRoutes); // register reporting routes
@@ -132,22 +146,12 @@ Product.belongsToMany(Order, {through: OrderItem}); // many-to-many association
 
 // MySql Seuelize Config
 sequelize.sync() // tell Sequelize to create tables if they don't exist
-// .then(result => {
-//     User.findByPk(1); // TODO: remove after authentication is configured
-//
-// })
-// .then(user => {
-//     if (!user) {
-//         return User.create({name: 'Test', email: 'testUser@test.com', password: 'password'})
-//     }
-//     return user;
-// })
-// .then(user => {
-//     return user.createCart();
-// })
-// .catch(err => {
-//     console.log(err);
-// });
+    .then(() => {
+        console.log('Sequelize has connected to MySQL!');
+    })
+    .catch(err => {
+        console.log('Error connecting Sequelize to MySQL \n' + err);
+    })
 
 // MongoDB Config
 mongoConnect((client) => {
@@ -158,23 +162,6 @@ mongoConnect((client) => {
 mongoose.connect(mongodb.MONGO_URL)
     .then(result => {
         console.log('Mongoose has connected to MongoDB!!!');
-
-        // check if a user exists, create one if none are found
-        // MongooseUser.findOne()
-        //     .then(user => {
-        //         if (!user) {
-        //             // create a new user if
-        //             const user = new MongooseUser({
-        //                 name: 'MongooseTestUser',
-        //                 email: 'mongooseUser@test.com',
-        //                 cart: {
-        //                     items: []
-        //                 }
-        //             });
-        //             user.save();
-        //         }
-        //     });
-
         app.listen(3000);
     })
     .catch(err => {

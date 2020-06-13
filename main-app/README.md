@@ -56,5 +56,5 @@ here. One using a querying approach utilizing native MongoDB syntax, and a secon
 can be found uner `routes/reporting/mongoose`.
 
 ## Authentication
-Session information is handled and stored utilizing `express-session` and `connect-mongodb-session` libraries. 
- 
+Session information is handled and stored utilizing `express-session` and `connect-mongodb-session` libraries. Errors messages encountered
+during authentication are flashed to the UI, utilizing the `connect-flash` library.

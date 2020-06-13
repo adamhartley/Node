@@ -11,7 +11,7 @@ const orderSchema = new Schema({
         quantity: {type: Number, required: true}
     }],
     user: {
-        name: {
+        email: {
             type: String,
             required: true
         },

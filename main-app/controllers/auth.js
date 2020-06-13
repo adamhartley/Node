@@ -2,6 +2,7 @@
  * Authorization controller
  */
 
+const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
 
 const User = require('../models/user')
@@ -9,12 +10,19 @@ const ReportingUser = require('../models/reporting/user')
 const MongooseUser = require('../models/reporting/mongoose/user')
 
 exports.getLogin = (req, res, next) => {
-    console.log('Cookie ' + req.get('Cookie'))
+    let errorMessage = req.flash('mongoUserError');
+
+    if (errorMessage.length > 0) {
+        errorMessage = errorMessage[0];
+    } else {
+        errorMessage = null;
+    }
+
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        isAuthenticated: req.session.isLoggedIn
-    })
+        errorMessage: errorMessage
+    });
 }
 
 exports.postLogin = (req, res, next) => {
@@ -47,6 +55,7 @@ exports.postLogin = (req, res, next) => {
     MongooseUser.findOne({email: email})
         .then(user => {
             if (!user) {
+                req.flash('mongoUserError', 'Invalid email or password.');
                 return res.redirect('/login');
             }
             bcrypt.compare(password, user.password)
@@ -60,6 +69,7 @@ exports.postLogin = (req, res, next) => {
                             res.redirect('/');
                         });
                     }
+                    req.flash('mongoUserError', 'Invalid email or password.');
                     res.redirect('/login');
                 })
                 .catch(err => {
@@ -79,10 +89,18 @@ exports.postLogout = (req, res, next) => {
 }
 
 exports.getSignup = (req, res, next) => {
+    let errorMessage = req.flash('mongoUserError');
+
+    if (errorMessage.length > 0) {
+        errorMessage = errorMessage[0];
+    } else {
+        errorMessage = null;
+    }
+
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Sign Up',
-        isAuthenticated: false
+        errorMessage: errorMessage
     });
 };
 
@@ -95,6 +113,7 @@ exports.postSignup = (req, res, next) => {
         .then(userDoc => {
             if (userDoc) { // if user exists, redirect to /signup TODO: improve error message if user found
                 console.log("Mongo user {} already exists", userDoc);
+                req.flash('mongoUserError', 'E-mail address already exists');
                 return;
                 // return res.redirect('/signup');
             }
@@ -138,3 +157,77 @@ exports.postSignup = (req, res, next) => {
             console.log(err);
         })
 };
+
+exports.getReset = (req, res, next) => {
+    let errorMessage = req.flash('mongoUserError');
+
+    if (errorMessage.length > 0) {
+        errorMessage = errorMessage[0];
+    } else {
+        errorMessage = null;
+    }
+
+    res.render('auth/reset', {
+        path: '/reset',
+        pageTitle: 'Reset Password',
+        errorMessage: errorMessage
+    });
+}
+
+exports.postReset = (req, res, next) => {
+    crypto.randomBytes(32, (err, buffer) => {
+        if (err) {
+            console.log(err);
+            return res.redirect('/reset');
+        }
+        const token = buffer.toString('hex');
+
+        console.log('email : ' + req.body.email);
+        // find user which we're trying to reset
+        MongooseUser.findOne({email: req.body.email})
+            .then(user => {
+                if (!user) {
+                    req.flash('mongoUserError', 'Unknown email address');
+                    return res.redirect('/reset');
+                }
+                user.resetToken = token;
+                user.resetTokenExpiration = Date.now() + 3600000; // expire in one hour from now
+                return user.save();
+            })
+            .then(result => {
+                if (result) {
+                    // send token reset email, faking with log message
+                    console.log('Dear user, a password reset email has been requested, click this link to reset: http://localhost:3000/reset/' + token);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    })
+}
+
+exports.getNewPassword = (req, res, next) => {
+    const token = req.params.token;
+    MongooseUser.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
+        .then(user => {
+            let errorMessage = req.flash('mongoUserError');
+
+            if (errorMessage.length > 0) {
+                errorMessage = errorMessage[0];
+            } else {
+                errorMessage = null;
+            }
+
+            console.log('Found a user ' + user);
+
+            res.render('auth/new-password', {
+                path: '/new-password',
+                pageTitle: 'New Password',
+                errorMessage: errorMessage,
+                mongooseUserId: user._id.toString()
+            });
+        })
+        .catch(err => {
+            console.log(err);
+        })
+}

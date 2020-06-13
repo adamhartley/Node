@@ -12,9 +12,8 @@ exports.getProducts = (req, res, next) => {
                 prods: products,
                 pageTitle: 'All Products',
                 path: '/products',
-                reporting: true,
+                reporting: false,
                 useMongoose: false,
-                isAuthenticated: req.session.isLoggedIn
             })
         })
         .catch(err => {
@@ -34,8 +33,7 @@ exports.getProduct = (req, res, next) => {
             res.render('shop/product-detail', {
                 product: product,
                 pageTitle: product.title,
-                path: '/products',
-                isAuthenticated: req.session.isLoggedIn
+                path: '/products'
             })
         })
         .catch(err => {
@@ -51,8 +49,7 @@ exports.getIndex = (req, res, next) => {
                 pageTitle: 'Shop',
                 path: '/',
                 reporting: false,
-                useMongoose: false,
-                isAuthenticated: req.session.isLoggedIn
+                useMongoose: false
             })
         })
         .catch(err => {
@@ -70,8 +67,7 @@ exports.getCart = (req, res, next) => {
                         pageTitle: 'Your Cart',
                         products: products,
                         reporting: false,
-                        useMongoose: false,
-                        isAuthenticated: req.session.isLoggedIn
+                        useMongoose: false
                     });
                 })
                 .catch(err => {
@@ -92,7 +88,13 @@ exports.postCart = (req, res, next) => {
     let newQuantity = 1;
     req.user.getCart()
         .then(cart => {
-            fetchedCart = cart;
+            if (!cart) {
+                console.log('cart did not exist, creating...')
+                // if cart undefined, create a cart
+                fetchedCart = req.user.createCart();
+            } else {
+                fetchedCart = cart;
+            }
             return cart.getProducts({where: {id: prodId}});
         })
         .then(products => {
@@ -183,8 +185,7 @@ exports.getOrders = (req, res, next) => {
                 pageTitle: 'Your Orders',
                 orders: orders,
                 reporting: false,
-                useMongoose: false,
-                isAuthenticated: req.session.isLoggedIn
+                useMongoose: false
             })
         })
         .catch(err => {
@@ -195,7 +196,6 @@ exports.getOrders = (req, res, next) => {
 exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
         path: '/checkout',
-        pageTitle: 'Checkout',
-        isAuthenticated: req.session.isLoggedIn
+        pageTitle: 'Checkout'
     })
 }

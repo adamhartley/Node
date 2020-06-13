@@ -10,8 +10,7 @@ exports.getAddProduct = (req, res, next) => {
         path: '/admin/add-product',
         editing: false,
         reporting: false,
-        useMongoose: false,
-        isAuthenticated: req.session.isLoggedIn
+        useMongoose: false
     });
 }
 
@@ -54,8 +53,7 @@ exports.getEditProduct = (req, res, next) => {
                 path: '/admin/edit-product',
                 editing: editMode,
                 product: product,
-                reporting: false,
-                isAuthenticated: req.session.isLoggedIn
+                reporting: false
             });
         })
         .catch(err => {
@@ -98,8 +96,7 @@ exports.getProducts = (req, res, next) => {
                 prods: products,
                 pageTitle: 'Admin Product List',
                 path: '/admin/products',
-                reporting: false,
-                isAuthenticated: req.session.isLoggedIn
+                reporting: false
             });
         })
         .catch(err => {
