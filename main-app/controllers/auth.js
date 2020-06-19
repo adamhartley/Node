@@ -4,6 +4,7 @@
 
 const crypto = require('crypto')
 const bcrypt = require('bcryptjs')
+const {validationResult} = require('express-validator/check') // use ES6 destructuring to unpack check function
 
 const User = require('../models/user')
 const ReportingUser = require('../models/reporting/user')
@@ -21,7 +22,12 @@ exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        errorMessage: errorMessage
+        errorMessage: errorMessage,
+        oldInput: {
+            email: '',
+            password: ''
+        },
+        validationErrors: []
     });
 }
 
@@ -29,6 +35,20 @@ exports.postLogin = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
 
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage: errors.array()[0].msg,
+            oldInput: {
+                email: email,
+                password: password
+            },
+            validationErrors: errors.array()
+        })
+    }
     // MySql user
     User.findAll({where: {email: email}})
         .then(users => {
@@ -50,13 +70,21 @@ exports.postLogin = (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-        })
+        });
 
     MongooseUser.findOne({email: email})
         .then(user => {
             if (!user) {
-                req.flash('mongoUserError', 'Invalid email or password.');
-                return res.redirect('/login');
+                return res.status(422).render('auth/login', {
+                    path: '/login',
+                    pageTitle: 'Login',
+                    errorMessage: 'Invalid email or password.',
+                    oldInput: {
+                        email: email,
+                        password: password
+                    },
+                    validationErrors: []
+                })
             }
             bcrypt.compare(password, user.password)
                 .then(passwordsMatch => {
@@ -69,8 +97,16 @@ exports.postLogin = (req, res, next) => {
                             res.redirect('/');
                         });
                     }
-                    req.flash('mongoUserError', 'Invalid email or password.');
-                    res.redirect('/login');
+                    return res.status(422).render('auth/login', {
+                        path: '/login',
+                        pageTitle: 'Login',
+                        errorMessage: 'Invalid email or password.',
+                        oldInput: {
+                            email: email,
+                            password: password
+                        },
+                        validationErrors: []
+                    })
                 })
                 .catch(err => {
                     console.log(err);
@@ -100,62 +136,52 @@ exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
         path: '/signup',
         pageTitle: 'Sign Up',
-        errorMessage: errorMessage
+        errorMessage: errorMessage,
+        oldInput: {
+            email: "",
+            password: "",
+            confirmPassword: ""
+        },
+        validationErrors: []
     });
 };
 
 exports.postSignup = (req, res, next) => {
     const email = req.body.email;
     const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
+    const errors = validationResult(req);
 
-    MongooseUser.findOne({email: email})
-        .then(userDoc => {
-            if (userDoc) { // if user exists, redirect to /signup TODO: improve error message if user found
-                console.log("Mongo user {} already exists", userDoc);
-                req.flash('mongoUserError', 'E-mail address already exists');
-                return;
-                // return res.redirect('/signup');
-            }
+    if (!errors.isEmpty()) {
+        return res.status(422).render('auth/signup', {
+            path: '/signup',
+            pageTitle: 'Sign Up',
+            errorMessage: errors.array()[0].msg,
+            oldInput: {email: email, password: password, confirmPassword: req.body.confirmPassword},
+            validationErrors: errors.array()
+        });
+    }
 
-            return bcrypt.hash(password, 12)
-                .then(hashedPassword => {
-                    const user = new MongooseUser({
-                        email: email,
-                        password: hashedPassword,
-                        cart: {item: []}
-                    });
-                    return user.save();
-                });
+    bcrypt.hash(password, 12)
+        .then(hashedPassword => {
+            const user = new MongooseUser({
+                email: email,
+                password: hashedPassword,
+                cart: {item: []}
+            });
+
+            User.create({
+                email: email,
+                password: hashedPassword
+            });
+
+            return user.save();
+        })
+        .then(() => {
+            return res.redirect('/login');
         })
         .catch(err => {
             console.log(err);
         });
-
-    // MySql user
-    User.count({
-        where: {email: email}
-    })
-        .then(count => {
-            if (count > 0) {
-                console.log("MySQL user already exists"); // TODO: improve error message if user found
-                // return res.redirect('/login');
-                return res.redirect('/login');
-            }
-            return bcrypt.hash(password, 12)
-                .then(hashedPassword => {
-                    return User.create({
-                        email: email,
-                        password: hashedPassword
-                    });
-                })
-                .then(() => {
-                    return res.redirect('/login');
-                });
-        })
-        .catch(err => {
-            console.log(err);
-        })
 };
 
 exports.getReset = (req, res, next) => {

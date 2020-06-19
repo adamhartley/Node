@@ -3,14 +3,18 @@
  */
 
 const Product = require('../models/product');
+const {validationResult} = require('express-validator/check')
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
         pageTitle: 'Add Product',
         path: '/admin/add-product',
         editing: false,
+        hasError: false,
         reporting: false,
-        useMongoose: false
+        useMongoose: false,
+        errorMessage: null,
+        validationErrors: []
     });
 }
 
@@ -19,6 +23,27 @@ exports.postAddProduct = (req, res, next) => {
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: {
+                title: title,
+                imageUrl: imageUrl,
+                price: price,
+                description: description
+            },
+            reporting: false,
+            useMongoose: false,
+            errorMessage: errors.array()[0].msg,
+            validationErrors: errors.array()
+        });
+    }
 
     req.user.createProduct({ // Sequelize method available as association was configured in app.js
         title: title,
@@ -52,8 +77,11 @@ exports.getEditProduct = (req, res, next) => {
                 pageTitle: 'Edit Product',
                 path: '/admin/edit-product',
                 editing: editMode,
+                hasError: false,
                 product: product,
-                reporting: false
+                reporting: false,
+                errorMessage: null,
+                validationErrors: []
             });
         })
         .catch(err => {
@@ -68,6 +96,29 @@ exports.postEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/admin/edit-product',
+            editing: true,
+            hasError: true,
+            product: {
+                title: updatedTitle,
+                imageUrl: updatedImageUrl,
+                price: updatedPrice,
+                description: updateDescription,
+                id: prodId
+            },
+            reporting: false,
+            useMongoose: false,
+            errorMessage: errors.array()[0].msg,
+            validationErrors: errors.array()
+        });
+    }
+
     // create a new product instance, and populate it with the updated info
     const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updateDescription, updatedPrice);
 

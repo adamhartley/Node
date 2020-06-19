@@ -2,6 +2,7 @@
  * Reporting Admin controller middleware functions
  */
 const mongodb = require('mongodb');
+const {validationResult} = require('express-validator/check')
 const ProductReporting = require('../../models/reporting/product')
 
 exports.getAddProduct = (req, res, next) => {
@@ -9,8 +10,11 @@ exports.getAddProduct = (req, res, next) => {
         pageTitle: 'Add Product',
         path: '/reporting/admin/add-product',
         editing: false,
+        hasError: false,
         reporting: true,
-        useMongoose: false
+        useMongoose: false,
+        errorMessage: null,
+        validationErrors: []
     });
 }
 
@@ -20,6 +24,27 @@ exports.postReportingAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
     const user = req.reportingUser;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/reporting/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: {
+                title: title,
+                imageUrl: imageUrl,
+                price: price,
+                description: description
+            },
+            reporting: true,
+            useMongoose: false,
+            errorMessage: errors.array()[0].msg,
+            validationErrors: errors.array()
+        });
+    }
 
     const productNoSql = new ProductReporting(title, price, description, imageUrl, null, user._id);
     console.log('Saving to MongoDB');
@@ -64,8 +89,11 @@ exports.getEditProduct = (req, res, next) => {
                 path: '/reporting/admin/edit-product',
                 editing: editMode,
                 product: product,
+                hasError: false,
                 reporting: true,
-                useMongoose: false
+                useMongoose: false,
+                errorMessage: null,
+                validationErrors: []
             });
         })
         .catch(err => {
@@ -81,6 +109,28 @@ exports.postEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/reporting/admin/edit-product',
+            editing: true,
+            hasError: true,
+            product: {
+                title: updatedTitle,
+                imageUrl: updatedImageUrl,
+                price: updatedPrice,
+                description: updateDescription,
+                _id: prodId
+            },
+            reporting: true,
+            useMongoose: false,
+            errorMessage: errors.array()[0].msg,
+            validationErrors: errors.array()
+        });
+    }
 
     const prod = ProductReporting.findById(prodId);
     // check if current user owns product to be edited

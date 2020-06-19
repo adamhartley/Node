@@ -1,3 +1,4 @@
+const {validationResult} = require('express-validator/check')
 const Product = require('../../../models/reporting/mongoose/product');
 
 exports.getAddProduct = (req, res, next) => {
@@ -5,17 +6,42 @@ exports.getAddProduct = (req, res, next) => {
         pageTitle: 'Add Product',
         path: '/reporting/mongoose/admin/add-product',
         editing: false,
+        hasError: false,
         reporting: true,
-        useMongoose: true
+        useMongoose: true,
+        errorMessage: null,
+        validationErrors: []
     });
 }
 
 exports.postAddProduct = (req, res, next) => {
+
     const title = req.body.title;
     const imageUrl = req.body.imageUrl;
     const price = req.body.price;
     const description = req.body.description;
     const user = req.mongooseUser;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/reporting/mongoose/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: {
+                title: title,
+                imageUrl: imageUrl,
+                price: price,
+                description: description
+            },
+            reporting: true,
+            useMongoose: true,
+            errorMessage: errors.array()[0].msg,
+            validationErrors: errors.array()
+        });
+    }
     const product = new Product({
         title: title,
         price: price,
@@ -60,13 +86,16 @@ exports.getEditProduct = (req, res, next) => {
     // only fetch products for the user currently logged in
     Product.findById(prodId)
         .then(product => {
-            res.render('admin/edit-product', {
+            return res.render('admin/edit-product', {
                 pageTitle: 'Edit Product',
                 path: '/reporting/mongoose/admin/edit-product',
                 editing: editMode,
                 product: product,
+                hasError: false,
                 reporting: true,
-                useMongoose: true
+                useMongoose: true,
+                errorMessage: null,
+                validationErrors: []
             });
         })
         .catch(err => {
@@ -81,6 +110,29 @@ exports.postEditProduct = (req, res, next) => {
     const updatedPrice = req.body.price;
     const updatedImageUrl = req.body.imageUrl;
     const updateDescription = req.body.description;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        console.log(errors);
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/reporting/mongoose/admin/edit-product',
+            editing: true,
+            hasError: true,
+            product: {
+                title: updatedTitle,
+                imageUrl: updatedImageUrl,
+                price: updatedPrice,
+                description: updateDescription,
+                _id: prodId
+
+            },
+            reporting: true,
+            useMongoose: true,
+            errorMessage: errors.array()[0].msg,
+            validationErrors: errors.array()
+        });
+    }
 
     // create a new product instance, and populate it with the updated info
     Product.findById(prodId)
