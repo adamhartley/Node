@@ -62,6 +62,13 @@ app.use(flash());
 const csrfProtection = csrf({});
 app.use(csrfProtection);
 
+// Utilize locals property to add params to all rendered views
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+})
+
 /* Standard User */
 app.use((req, res, next) => {
     if (!req.session.user) {
@@ -71,11 +78,14 @@ app.use((req, res, next) => {
     console.log('Fetching MySQL session data for user');
     User.findByPk(req.session.user)
         .then(user => {
+            if (!user) {
+                return next();
+            }
             req.user = user; // store Sequelize object for use elsewhere in the app
             next();
         })
         .catch(err => {
-            console.log(err)
+            throw new Error(err);
         })
 })
 
@@ -86,13 +96,16 @@ app.use((req, res, next) => {
     }
     ReportingUser.findById(req.session.reportingUser._id)
         .then(user => {
+            if (!user) {
+                return next();
+            }
             /* create and adding the user to the request object allows us to call ReportingUser methods
                on the object being passed around (e.g. see controllers/reporting/shop-reporting/postCart()) */
             req.reportingUser = new ReportingUser(user.name, user.email, user.cart, user._id);
             next();
         })
         .catch(err => {
-            console.log(err);
+            throw new Error(err);
         });
 })
 
@@ -103,19 +116,15 @@ app.use((req, res, next) => {
     }
     MongooseUser.findById(req.session.mongooseUser._id)
         .then(user => {
+            if (!user) {
+                return next();
+            }
             req.mongooseUser = user;
             next();
         })
         .catch(err => {
-            console.log(err);
+            throw new Error(err);
         })
-})
-
-// Utilize locals property to add params to all rendered views
-app.use((req, res, next) => {
-    res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken();
-    next();
 })
 
 app.use('/admin', adminRoutes); // register admin routes
@@ -126,8 +135,17 @@ app.use('/reporting/mongoose', shopReportingMongooseRoutes); // register reporti
 app.use('/reporting/mongoose/admin', shopReportingAdminMongooseRoutes); // register reporting admin mongoose routes
 app.use(authRoutes);
 
+app.get('/500', errorController.get500);
 // catch all route: if we made it through all the routes, return a 404 page not found
-app.use(errorController.get404)
+app.use(errorController.get404);
+
+app.use((error, req, res, next) => {
+    res.status(500).render('500', {
+        pageTitle: 'Error',
+        path: '/500',
+        isAuthenticated: req.session.isLoggedIn
+    });
+});
 
 /*
  * Configure database associations

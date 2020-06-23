@@ -5,6 +5,7 @@ const path = require('path');
 const authController = require('../controllers/auth')
 const MongooseUser = require('../models/reporting/mongoose/user')
 const User = require('../models/user')
+const userHelper = require('../models/utils/userHelper')
 
 const router = express.Router();
 
@@ -32,23 +33,16 @@ router.post(
             .isEmail()
             .withMessage('Please enter a valid email')
             .custom((value, {req}) => {
-                return MongooseUser.findOne({email: value})
-                    .then(userDoc => {
-                        if (userDoc) {
-                            console.log("Mongo user already exists");
-                            return Promise.reject('E-mail already in use');
+
+                return userHelper.isValidSignupEmail(value)
+                    .then(isValid => {
+                        console.log('isValidEmail: ' + isValid);
+                        if (isValid) {
+                            return isValid;
+                        } else {
+                            return Promise.reject('Email address already in use');
                         }
-                        // MySql user
-                        User.count({
-                            where: {email: value}
-                        })
-                            .then(count => {
-                                if (count > 0) {
-                                    console.log("MySQL user already exists");
-                                    return Promise.reject('E-mail already in use');
-                                }
-                            });
-                    })
+                    });
             })
             .normalizeEmail(),
         body('password',
