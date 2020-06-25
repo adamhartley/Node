@@ -129,9 +129,8 @@ class User {
                 const order = {
                     items: products,
                     user: {
-                        _id: mongodb.ObjectID(this._id),
                         name: this.username,
-                        email: this.email
+                        userId: this._id
                     }
                 };
                 return db.collection(ORDERS_COLLECTION)
@@ -152,8 +151,21 @@ class User {
     getOrders() {
         const db = getDb();
         return db.collection(ORDERS_COLLECTION)
-            .find({'user._id': mongodb.ObjectID(this._id)})
+            .find({'user.userId': mongodb.ObjectID(this._id)})
             .toArray();
+    }
+
+    static getOrderById(orderId) {
+        const db = getDb();
+        return db.collection(ORDERS_COLLECTION)
+            .find({_id: mongodb.ObjectID(orderId)})
+            .next()
+            .then(order => {
+                return order;
+            })
+            .catch(err => {
+                console.log(err)
+            })
     }
 }
 

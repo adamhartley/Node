@@ -117,7 +117,7 @@ exports.postOrder = (req, res, next) => {
 }
 
 exports.getOrders = (req, res, next) => {
-    req.reportingUser.getOrders() // Sequelize eager loading - also fetch the products
+    req.reportingUser.getOrders()
         .then(orders => {
             res.render('shop/orders', {
                 path: '/reporting/orders',

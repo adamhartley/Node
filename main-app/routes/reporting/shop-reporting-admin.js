@@ -3,6 +3,7 @@ const path = require('path');
 const {body} = require('express-validator/check')
 
 const shopReportingController = require('../../controllers/reporting/admin-reporting')
+
 const isAuth = require('../../middleware/is-auth')
 
 const router = express.Router();
@@ -15,8 +16,6 @@ router.post('/add-product',
             .isString()
             .isLength({min: 3})
             .trim(),
-        body('imageUrl')
-            .isURL({}),
         body('price')
             .isFloat(),
         body('description')
@@ -36,8 +35,6 @@ router.post('/edit-product',
             .isString()
             .isLength({min: 3})
             .trim(),
-        body('imageUrl')
-            .isURL(),
         body('price')
             .isFloat(),
         body('description')

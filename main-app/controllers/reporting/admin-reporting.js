@@ -20,11 +20,29 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postReportingAddProduct = (req, res, next) => {
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
+    const image = req.file;
     const price = req.body.price;
     const description = req.body.description;
     const user = req.reportingUser;
     const errors = validationResult(req);
+
+    if (!image) {
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/reporting/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: {
+                title: title,
+                price: price,
+                description: description
+            },
+            reporting: true,
+            useMongoose: false,
+            errorMessage: 'Attached file is not an image',
+            validationErrors: []
+        });
+    }
 
     if (!errors.isEmpty()) {
         console.log(errors);
@@ -35,7 +53,6 @@ exports.postReportingAddProduct = (req, res, next) => {
             hasError: true,
             product: {
                 title: title,
-                imageUrl: imageUrl,
                 price: price,
                 description: description
             },
@@ -46,7 +63,7 @@ exports.postReportingAddProduct = (req, res, next) => {
         });
     }
 
-    const productNoSql = new ProductReporting(title, price, description, imageUrl, null, user._id);
+    const productNoSql = new ProductReporting(title, price, description, image.path, null, user._id);
     console.log('Saving to MongoDB');
 
     productNoSql.save()
@@ -113,7 +130,7 @@ exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.productId;
     const updatedTitle = req.body.title;
     const updatedPrice = req.body.price;
-    const updatedImageUrl = req.body.imageUrl;
+    const image = req.file;
     const updateDescription = req.body.description;
     const errors = validationResult(req);
 
@@ -126,7 +143,6 @@ exports.postEditProduct = (req, res, next) => {
             hasError: true,
             product: {
                 title: updatedTitle,
-                imageUrl: updatedImageUrl,
                 price: updatedPrice,
                 description: updateDescription,
                 _id: prodId
@@ -143,6 +159,11 @@ exports.postEditProduct = (req, res, next) => {
     if (prod.userId.toString() !== req.reportingUser._id.toString()) {
         console.log('User attempting to edit product which they do not own!!!');
         return res.redirect('/');
+    }
+
+    let updatedImageUrl = null;
+    if (image) {
+        updatedImageUrl = image.path;
     }
 
     // create a new product instance, and populate it with the updated info

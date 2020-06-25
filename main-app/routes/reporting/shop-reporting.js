@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 
+const commonController = require('../../controllers/common')
 const shopReportingController = require('../../controllers/reporting/shop-reporting')
 const isAuth = require('../../middleware/is-auth')
 
@@ -20,5 +21,7 @@ router.post('/cart-delete-item', isAuth, shopReportingController.postCartDeleteP
 router.post('/create-order', isAuth, shopReportingController.postOrder);
 
 router.get('/orders', isAuth, shopReportingController.getOrders);
+
+router.get('/orders/:orderId', isAuth, commonController.getInvoice);
 
 module.exports = router;

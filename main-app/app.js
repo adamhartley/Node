@@ -4,7 +4,8 @@ const path = require('path');
 const session = require('express-session')
 const MongoDbSessionStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
-const flash = require('connect-flash')
+const flash = require('connect-flash');
+const multer = require('multer');
 
 /* Routes */
 const authRoutes = require('./routes/auth');
@@ -42,6 +43,29 @@ const sessionStore = new MongoDbSessionStore({
     uri: mongodb.MONGO_URL,
     collection: 'sessions'
 });
+
+// configure multer storage
+const fileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images');
+    },
+    filename: (req, file, cb) => {
+        cb(null, new Date().toISOString() + '-' + file.originalname);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (
+        file.mimetype === 'image/png' ||
+        file.mimetype === 'image/jpg' ||
+        file.mimetype === 'image/jpeg'
+    ) {
+        cb(null, true);
+    } else {
+        cb(null, false);
+    }
+};
+
 /*
  * Use the EJS templating engine
  */
@@ -49,7 +73,12 @@ app.set('view engine', 'ejs'); //use EJS engine to compile dynamic templates
 app.set('views', 'views'); // where to find the html files (views is the default, but setting it anyway)
 
 app.use(bodyParser.urlencoded({extended: false})); // add request parser (body-parser package)
+app.use(
+    // using 3rd party package multer to parse image file in body of add/edit products
+    multer({storage: fileStorage, fileFilter: fileFilter}).single('image')
+);
 app.use(express.static(path.join(rootDir, 'public'))); // add public path for static file access
+app.use('/images', express.static(path.join(rootDir, 'images'))); // add public path for static file access
 app.use(session({ // configure session middleware
     secret: 'my secret',
     resave: false,

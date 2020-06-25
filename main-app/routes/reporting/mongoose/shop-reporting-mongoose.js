@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 
 const mongooseController = require('../../../controllers/reporting/mongoose/shop-reporting-mongoose');
+const commonController = require('../../../controllers/common')
 const isAuth = require('../../../middleware/is-auth');
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.post('/create-order', isAuth, mongooseController.postOrder);
 
 router.get('/orders', isAuth, mongooseController.getOrders);
 
+router.get('/orders/:orderId', isAuth, commonController.getInvoice)
 
 module.exports = router;

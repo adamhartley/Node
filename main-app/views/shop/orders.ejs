@@ -10,10 +10,12 @@
         <ul class="orders">
             <% orders.forEach(order => { %>
                 <li class="orders__item">
-                    <% if (reporting) { %>
-                        <h1>Order - # <%= order._id %></h1>
+                    <% if (reporting && !useMongoose) { %>
+                        <h1>Order - # <%= order._id %> - <a href="/reporting/orders/<%= order._id %>">Invoice</a></h1>
+                    <% } else if (reporting && useMongoose) { %>
+                        <h1>Order - # <%= order._id %> - <a href="/reporting/mongoose/orders/<%= order._id %>">Invoice</a></h1>
                     <% } else { %>
-                        <h1>Order - # <%= order.id %></h1>
+                        <h1>Order - # <%= order.id %> - <a href="/orders/<%= order.id %>">Invoice</a></h1>
                     <% } %>
                     <ul class="orders__products">
                         <% if (reporting && !useMongoose) { %>

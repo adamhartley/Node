@@ -127,6 +127,7 @@ exports.postOrder = (req, res, next) => {
                 },
                 items: products
             });
+
             return order.save();
         })
         .then(() => {
@@ -144,8 +145,10 @@ exports.postOrder = (req, res, next) => {
 }
 
 exports.getOrders = (req, res, next) => {
+    console.log('Getting mongoose orders...')
     Order.find({'user.userId': req.mongooseUser._id})
         .then(orders => {
+            console.log('found orders....rendering...' + orders.size)
             res.render('shop/orders', {
                 path: '/reporting/mongoose/orders',
                 pageTitle: 'Your Orders',

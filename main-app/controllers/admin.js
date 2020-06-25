@@ -20,10 +20,28 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
+    const image = req.file;
     const price = req.body.price;
     const description = req.body.description;
     const errors = validationResult(req);
+
+    if (!image) {
+        return res.status(422).render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            path: '/admin/add-product',
+            editing: false,
+            hasError: true,
+            product: {
+                title: title,
+                price: price,
+                description: description
+            },
+            reporting: false,
+            useMongoose: false,
+            errorMessage: 'Attached file is not an image',
+            validationErrors: []
+        });
+    }
 
     if (!errors.isEmpty()) {
         console.log(errors);
@@ -34,7 +52,6 @@ exports.postAddProduct = (req, res, next) => {
             hasError: true,
             product: {
                 title: title,
-                imageUrl: imageUrl,
                 price: price,
                 description: description
             },
@@ -48,7 +65,7 @@ exports.postAddProduct = (req, res, next) => {
     req.user.createProduct({ // Sequelize method available as association was configured in app.js
         title: title,
         price: price,
-        imageUrl: imageUrl,
+        imageUrl: image.path,
         description: description
     })
         .then(result => {
@@ -100,7 +117,7 @@ exports.postEditProduct = (req, res, next) => {
     const prodId = req.body.productId;
     const updatedTitle = req.body.title;
     const updatedPrice = req.body.price;
-    const updatedImageUrl = req.body.imageUrl;
+    const image = req.file;
     const updateDescription = req.body.description;
     const errors = validationResult(req);
 
@@ -113,7 +130,6 @@ exports.postEditProduct = (req, res, next) => {
             hasError: true,
             product: {
                 title: updatedTitle,
-                imageUrl: updatedImageUrl,
                 price: updatedPrice,
                 description: updateDescription,
                 id: prodId
@@ -125,14 +141,13 @@ exports.postEditProduct = (req, res, next) => {
         });
     }
 
-    // create a new product instance, and populate it with the updated info
-    const updatedProduct = new Product(prodId, updatedTitle, updatedImageUrl, updateDescription, updatedPrice);
-
     Product.findByPk(prodId)
         .then(product => {
             product.title = updatedTitle;
             product.price = updatedPrice;
-            product.imageUrl = updatedImageUrl;
+            if (image) {
+                product.imageUrl = image.path
+            }
             product.description = updateDescription;
             return product.save(); // return to avoid nested promise
         })
