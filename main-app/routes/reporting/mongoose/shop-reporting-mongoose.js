@@ -17,6 +17,8 @@ router.post('/cart', isAuth, mongooseController.postCart);
 
 router.post('/cart-delete-item', isAuth, mongooseController.postCartDeleteProduct);
 
+router.get('/checkout', isAuth, mongooseController.getCheckout)
+
 router.post('/create-order', isAuth, mongooseController.postOrder);
 
 router.get('/orders', isAuth, mongooseController.getOrders);

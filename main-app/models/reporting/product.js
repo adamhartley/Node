@@ -40,7 +40,7 @@ class Product {
         const db = getDb();
         return db.collection(collection)
             .find()
-            .toArray() // TODO: replace toArray with pagination
+            .toArray()
             .then(products => {
                 console.log(products);
                 return products;
@@ -48,6 +48,28 @@ class Product {
             .catch(err => {
                 console.log(err)
             });
+    }
+
+    static fetchRange(skip, limit) {
+        const db = getDb();
+        return db.collection(collection)
+            .find()
+            .skip(skip)
+            .limit(limit)
+            .toArray()
+            .then(products => {
+                console.log(products);
+                return products;
+            })
+            .catch(err => {
+                console.log(err)
+            });
+    }
+
+    static getCount() {
+        const db = getDb();
+        return db.collection(collection)
+            .countDocuments();
     }
 
     static fetchAllForUser(userId) {

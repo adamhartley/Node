@@ -2,10 +2,18 @@
  * Shop controller
  */
 const Product = require('../models/product');
+const {ITEMS_PER_PAGE} = require('./constants')
 
 exports.getProducts = (req, res, next) => {
-    console.log('getProducts')
-    Product.findAll()
+    const page = +req.query.page || 1;
+    let totalItems;
+    const offset = (page - 1) * ITEMS_PER_PAGE;
+
+    Product.count()
+        .then(count => {
+            totalItems = count;
+            return Product.findAll({offset: offset, limit: ITEMS_PER_PAGE});
+        })
         .then(products => {
             res.render('shop/product-list', {
                 prods: products,
@@ -13,6 +21,12 @@ exports.getProducts = (req, res, next) => {
                 path: '/products',
                 reporting: false,
                 useMongoose: false,
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
             })
         })
         .catch(err => {

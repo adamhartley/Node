@@ -3,9 +3,17 @@
  */
 
 const ProductReporting = require('../../models/reporting/product')
+const {ITEMS_PER_PAGE} = require('../constants')
 
 exports.getProductsReporting = (req, res, next) => {
-    ProductReporting.fetchAll()
+    const page = +req.query.page || 1;
+    let totalItems;
+
+    ProductReporting.getCount()
+        .then(count => {
+            totalItems = count;
+            return ProductReporting.fetchRange((page - 1) * ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+        })
         .then(products => {
             console.log('Fetched NoSQL Products');
             console.log(products);
@@ -14,7 +22,13 @@ exports.getProductsReporting = (req, res, next) => {
                 pageTitle: 'All Products',
                 path: '/reporting/products',
                 reporting: true,
-                useMongoose: false
+                useMongoose: false,
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
             })
         })
         .catch(err => {

@@ -4,9 +4,21 @@
 
 const Product = require('../../../models/reporting/mongoose/product');
 const Order = require('../../../models/reporting/mongoose/order');
+const {ITEMS_PER_PAGE} = require('../../constants')
+
 
 exports.getProducts = (req, res, next) => {
-    Product.find()
+    const page = +req.query.page || 1;
+    let totalItems;
+
+    Product.find().countDocuments()
+        .then(numProducts => {
+            totalItems = numProducts;
+
+            return Product.find()
+                .skip((page - 1) * ITEMS_PER_PAGE) // pagination functionality
+                .limit(ITEMS_PER_PAGE)
+        })
         .then(products => {
             console.log('Fetched Mongoose Products');
             res.render('shop/product-list', {
@@ -14,7 +26,13 @@ exports.getProducts = (req, res, next) => {
                 pageTitle: 'All Mongoose Products',
                 path: '/reporting/mongoose/products',
                 reporting: true,
-                useMongoose: true
+                useMongoose: true,
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPreviousPage: page > 1,
+                nextPage: page + 1,
+                previousPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
             })
         })
         .catch(err => {
@@ -105,6 +123,35 @@ exports.postCartDeleteProduct = (req, res, next) => {
             error.httpStatusCode = 500;
             return next(error);
         });
+}
+
+exports.getCheckout = (req, res, next) => {
+    req.mongooseUser
+        .populate('cart.items.productId')
+        .execPopulate()
+        .then(user => {
+            console.log('user.cart ' + user.cart)
+            const products = user.cart.items;
+            let total = 0;
+
+            products.forEach(p => {
+                total += p.quantity * p.productId.price;
+            })
+
+            res.render('shop/checkout', {
+                path: '/checkout',
+                pageTitle: 'Checkout',
+                products: products,
+                reporting: true,
+                useMongoose: true,
+                totalSum: total
+            })
+        })
+        .catch(err => {
+            const error = new Error(err);
+            error.httpStatusCode = 500;
+            return next(error);
+        })
 }
 
 exports.postOrder = (req, res, next) => {

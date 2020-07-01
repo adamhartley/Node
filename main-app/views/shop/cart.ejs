@@ -34,22 +34,19 @@
                             <input type="hidden" value="<%= cartProduct.id %>" name="productId">
                             <button class="btn danger" type="submit">Delete</button>
                         </form>
-                    <% } %>
+                        <% } %>
                 </li>
             <% }) %>
         </ul>
         <hr>
         <div class="centered">
-            <% if (reporting && useMongoose) { %>
-            <form action="/reporting/mongoose/create-order" method="POST">
-                <% } else if (reporting && !useMongoose) { %>
-                <form action="/reporting/create-order" method="POST">
-                    <% } else { %>
-                    <form action="/create-order" method="POST">
-                        <% } %>
-                        <button type="submit" class="btn">Order Now!</button>
-                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    </form>
+            <% if (useMongoose) { %>
+                <a class="btn" href="/reporting/mongoose/checkout">Order Now</a>
+            <% } else if (reporting) { %>
+                <a class="btn" href="/reporting/checkout">Order Now</a>
+            <% } else { %>
+                <a class="btn" href="/checkout">Order Now</a>
+            <% } %>
         </div>
     <% } else { %>
         <h1>No products in Cart!</h1>

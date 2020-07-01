@@ -43,6 +43,6 @@ router.post('/edit-product',
     isAuth,
     mongooseAdminController.postEditProduct);
 
-router.post('/delete-product', isAuth, mongooseAdminController.postDeleteProduct)
+router.delete('/product/:productId', isAuth, mongooseAdminController.deleteProduct)
 
 module.exports = router;
