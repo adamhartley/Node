@@ -1,0 +1,55 @@
+<%- include('../includes/head.ejs') %>
+<link rel="stylesheet" href="/css/cart.css">
+</head>
+<body>
+<%- include('../includes/navigation.ejs') %>
+<main>
+    <% if (products.length > 0) { %>
+        <ul class="cart__item-list">
+            <% products.forEach(cartProduct => { %>
+                <li class="cart__item">
+                    <% if (useMongoose) { %>
+                        <h1><%= cartProduct.productId.title %></h1>
+                    <% } else { %>
+                        <h1><%= cartProduct.title %></h1>
+                    <% } %>
+                    <% if (reporting && !useMongoose) { %>
+                        <h2>Quantity: <%= cartProduct.quantity %></h2>
+                        <form action="/reporting/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" value="<%= cartProduct._id %>" name="productId">
+                            <button class="btn danger" type="submit">Delete</button>
+                        </form>
+                    <% } else if (reporting && useMongoose) { %>
+                        <h2>Quantity: <%= cartProduct.quantity %></h2>
+                        <form action="/reporting/mongoose/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" value="<%= cartProduct.productId._id %>" name="productId">
+                            <button class="btn danger" type="submit">Delete</button>
+                        </form>
+                    <% } else { %>
+                        <h2>Quantity: <%= cartProduct.cartItem.quantity %></h2>
+                        <form action="/cart-delete-item" method="POST">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <input type="hidden" value="<%= cartProduct.id %>" name="productId">
+                            <button class="btn danger" type="submit">Delete</button>
+                        </form>
+                    <% } %>
+                </li>
+            <% }) %>
+        </ul>
+        <hr>
+        <div class="centered">
+            <% if (useMongoose) { %>
+                <a class="btn" href="/reporting/mongoose/checkout">Order Now</a>
+            <% } else if (reporting) { %>
+                <a class="btn" href="/reporting/checkout">Order Now</a>
+            <% } else { %>
+                <a class="btn" href="/checkout">Order Now</a>
+            <% } %>
+        </div>
+    <% } else { %>
+        <h1>No products in Cart!</h1>
+    <% } %>
+</main>
+<%- include('../includes/end.ejs') %>
