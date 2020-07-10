@@ -12,7 +12,7 @@ This application is constructed following the MVC architectural pattern. Package
 In the application root directory, a docker compose file has been configured to startup containers for MySQL and Mongo databases. Before
 starting the application:
 1. `cd main-app` 
-2. `docker-compose up -d` 
+1. `docker-compose up -d` 
 
 The docker containers should now be running, and can be verified by running:
 

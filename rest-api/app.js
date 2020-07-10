@@ -3,10 +3,18 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
+const {graphqlHTTP} = require('express-graphql');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const feedRoutes = require('./routes/feed');
 const authRoutes = require('./routes/auth');
 const mongodb = require('./util/mongodb');
+
+const graphqlSchema = require('./graphql/schema');
+const graphqlResolver = require('./graphql/resolvers')
+
+const {swaggerDoc} = require('./resources/openapi');
 
 const app = express();
 
@@ -55,6 +63,16 @@ app.use((error, req, res, next) => {
     res.status(status)
         .json({message: message, data: data});
 });
+
+app.use('/graphql', graphqlHTTP({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+    graphiql: true
+}));
+
+// api docs
+const apiDocs = swaggerJsdoc(swaggerDoc);
+app.use('/api', swaggerUi.serve, swaggerUi.setup(apiDocs, {explorer: true}));
 
 mongoose.connect(mongodb.MONGO_URL)
     .then(result => {

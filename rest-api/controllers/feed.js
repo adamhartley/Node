@@ -15,6 +15,7 @@ exports.getPosts = (req, res, next) => {
             totalItems = count;
             return Post.find()
                 .populate('creator')
+                .sort({createdAt: -1}) // sort by createdAt descending, newest first
                 .skip((currentPage - 1) * perPage)
                 .limit(perPage);
         })
@@ -146,6 +147,7 @@ exports.updatePost = (req, res, next) => {
     }
 
     Post.findById(postId)
+        .populate('creator') // fetch all user data when querying post
         .then(post => {
             if (!post) {
                 const error = new Error('No post found');
@@ -154,7 +156,7 @@ exports.updatePost = (req, res, next) => {
             }
 
             // check if creator id is the same as the logged in user
-            if (post.creator.toString() !== req.userId) {
+            if (post.creator._id.toString() !== req.userId) {
                 const error = new Error('Not authorized');
                 error.statusCode = 403;
                 throw error;
@@ -171,6 +173,9 @@ exports.updatePost = (req, res, next) => {
             return post.save();
         })
         .then(result => {
+            // emit websocket event to update all clients
+            io.getIO().emit('posts', {action: 'update', post: result});
+
             res.status(200)
                 .json({
                     message: 'Post updated!',
@@ -214,6 +219,8 @@ exports.deletePost = (req, res, next) => {
             return user.save();
         })
         .then(result => {
+            io.getIO().emit('posts', {action: 'delete', post: postId});
+
             res.status(200)
                 .json({
                     message: 'Post deleted!'
